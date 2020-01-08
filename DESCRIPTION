@@ -1,15 +1,20 @@
-Package: interactive.xaringan
+Package: interactingan
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Interactive Presentation Ninja
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: c(
+    person(given = "Juan Cruz", family = "Rodriguez", 
+        role = c("aut", "cre"), email = "jcrodriguez@unc.edu.ar")
+    )
+Maintainer: Juan Cruz Rodriguez <jcrodriguez@unc.edu.ar>
+Description: Create public interactions in your xaringan slides. Can also be 
+    used with any other RMarkdown document that returns html output.
+License: MIT + file LICENSE
+URL: https://github.com/jcrodriguez1989/interactingan
+BugReports: https://github.com/jcrodriguez1989/interactingan/issues
 Encoding: UTF-8
 Imports:
     qrcode,
     rsconnect
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

@@ -1,4 +1,19 @@
-#' @importFrom qrcode qrcode_gen
+#' Set up the interactions server
+#'
+#' `interactingan` package creates a Shiny app to allow the interactions, this
+#' app must be hosted on any Shiny server, by default it will try to use
+#' [shinyapps.io](shinyapps.io).
+#' Calling this function will reset all existing interaction objects.
+#'
+#' @param app_name A character -string- with the name of the Shiny app to
+#'   create. Must be unique in your Shiny server, or it will overwrite it.
+#' @param url A character -string- (optional) to provide a valid existing
+#'   `interactingan` server instance that was previously configured.
+#' @param ... Additional parameters passed to `rsconnect::deployApp` function.
+#'
+#' @return A QR code image that will point to the server url.
+#'
+#' @import qrcode
 #' @importFrom rsconnect deployApp
 #'
 #' @export
@@ -7,15 +22,17 @@ set_app <- function(app_name = "presentation", url = NULL, ...) {
   elems$polls <- list()
   res_params <- list(
     app_name = app_name,
-    url = url
-    # dots = as.list(as.environment(...))
+    url = url,
+    dots = list(...)
   )
 
-  # qrCodeSpec # if not imported ~> bug in qrcode?
   if (!is.null(url)) {
     res_params$url <- url
+    res_params$deployed <- FALSE
     app_info$params <- res_params
-    # return(qrcode_gen(url))
+    if (require("qrcode")) {
+      return(qrcode_gen(url))
+    }
     return(invisible(url))
   }
 
@@ -30,14 +47,17 @@ set_app <- function(app_name = "presentation", url = NULL, ...) {
   })
 
   if (!conn_success ||
-      !any(grepl("Application successfully deployed to ", output))) {
+    !any(grepl("Application successfully deployed to ", output))) {
     stop("Could not set app. Make sure `rsconnect` is well configured.")
   }
 
   conn_url <- output[grepl("Application successfully deployed to ", output)]
+  res_params$deployed <- TRUE
   res_params$url <- gsub("Application successfully deployed to ", "", conn_url)
   app_info$params <- res_params
-  # invisible(qrcode_gen(res_params$url))
+  if (require("qrcode")) {
+    return(qrcode_gen(res_params$url))
+  }
   invisible(res_params$url)
 }
 

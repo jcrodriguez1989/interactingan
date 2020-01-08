@@ -1,3 +1,8 @@
+#' Deploy all interactions to the server
+#'
+#' Deploys all created interaction objects to the, `interactingan` Shiny server,
+#' previously configured by the `set_app` function.
+#'
 #' @export
 #'
 deploy_interactions <- function() {
@@ -8,22 +13,38 @@ deploy_interactions <- function() {
 
   create_shiny_file(out_file)
 
-  output <- capture.output({
-    conn_success <- rsconnect::deployApp(
-      appDir = app_dir,
-      appName = app_info$params$app_name,
-      launch.browser = FALSE,
-      forceUpdate = TRUE,
-      app_info$params$dots
-    )
-  })
+  if (app_info$params$deployed) {
+    dots <- app_info$params$dots
+    fun_call <- as.call(append(
+      rsconnect::deployApp,
+      c(
+        appDir = app_dir,
+        appName = app_info$params$app_name,
+        launch.browser = FALSE,
+        forceUpdate = TRUE,
+        dots
+      )
+    ))
+    output <- capture.output({
+      conn_success <- eval(fun_call, list2env(dots))
+    })
+    # output <- capture.output({
+    #   conn_success <- rsconnect::deployApp(
+    #     appDir = app_dir,
+    #     appName = app_info$params$app_name,
+    #     launch.browser = FALSE,
+    #     forceUpdate = TRUE,
+    #     app_info$params$dots
+    #   )
+    # })
 
-  if (!conn_success ||
+    if (!conn_success ||
       !any(grepl("Application successfully deployed to ", output))) {
-    stop("Could not set app. Make sure `rsconnect` is well configured.")
+      stop("Could not set app. Make sure `rsconnect` is well configured.")
+    }
   }
 
-  out_file
+  invisible(out_file)
 }
 
 create_shiny_file <- function(out_file) {
@@ -33,6 +54,7 @@ create_shiny_file <- function(out_file) {
   add_polls_vars(out_file, polls)
 
   add_ui_header(out_file)
+  add_obj_selector_ui(out_file, polls)
   add_polls_ui(out_file, polls)
   add_ui_footer(out_file)
 
@@ -59,7 +81,7 @@ add_app_header <- function(file) {
 }
 
 add_polls_vars <- function(file, polls) {
-  lapply(polls, add_poll_vars, file)
+  invisible(lapply(polls, add_poll_vars, file))
 }
 
 add_poll_vars <- function(poll, file) {
@@ -86,6 +108,25 @@ add_ui_header <- function(file) {
   ), file = file, append = TRUE)
 }
 
+add_obj_selector_ui <- function(out_file, polls) {
+  cat(paste(
+    "  conditionalPanel(",
+    '    "(output.is_viewer==true)",',
+    '    selectInput(inputId = "act_obj", label = "", choices = c(',
+    paste(
+      lapply(seq_along(polls), function(i) {
+        paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
+      }),
+      collapse = ",\n"
+    ),
+    "    ))",
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = out_file, append = TRUE)
+}
+
 add_polls_ui <- function(file, polls) {
   lapply(polls, add_poll_ui, file)
   cat("  NULL
@@ -105,6 +146,7 @@ add_poll_ui <- function(poll, file) {
       '")),',
       collapse = "\n"
     ),
+    '    align = "center"',
     "  ),",
     "  conditionalPanel(",
     paste0(
@@ -140,9 +182,12 @@ add_server_header <- function(file) {
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",
-    "  observeEvent(getQueryString(), {",
+    "  observeEvent({",
+    "    getQueryString()",
+    "    input$act_obj",
+    "  }, {",
     '    if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "TRUE") {',
-    "      act_object(getQueryString()$object)",
+    "      act_object(input$act_obj)",
     "    }",
     "  })",
     "  output$act_object <- reactive({",
@@ -156,7 +201,7 @@ add_server_header <- function(file) {
 }
 
 add_polls_server <- function(file, polls) {
-  lapply(polls, add_poll_server, file)
+  invisible(lapply(polls, add_poll_server, file))
 }
 
 add_poll_server <- function(poll, file) {
