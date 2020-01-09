@@ -9,7 +9,9 @@ deploy_interactions <- function() {
   # create a random folder for the app to deploy
   app_dir <- paste0(tempdir(), "/app")
   out_file <- paste0(app_dir, "/app.R")
+  
   dir.create(app_dir, showWarnings = FALSE)
+  unlink(out_file)
 
   create_shiny_file(out_file)
 
@@ -28,15 +30,6 @@ deploy_interactions <- function() {
     output <- capture.output({
       conn_success <- eval(fun_call, list2env(dots))
     })
-    # output <- capture.output({
-    #   conn_success <- rsconnect::deployApp(
-    #     appDir = app_dir,
-    #     appName = app_info$params$app_name,
-    #     launch.browser = FALSE,
-    #     forceUpdate = TRUE,
-    #     app_info$params$dots
-    #   )
-    # })
 
     if (!conn_success ||
       !any(grepl("Application successfully deployed to ", output))) {
@@ -48,20 +41,34 @@ deploy_interactions <- function() {
 }
 
 create_shiny_file <- function(out_file) {
+  # Shiny app header (includes)
   add_app_header(out_file)
 
+  # Global vars
   polls <- elems$polls
+  if (elems$audience_questions) {
+    add_aud_qs_vars(out_file)
+  }
   add_polls_vars(out_file, polls)
 
+  # UI
   add_ui_header(out_file)
-  add_obj_selector_ui(out_file, polls)
+  add_obj_selector_ui(out_file, elems)
+  if (elems$audience_questions) {
+    add_aud_qs_ui(out_file)
+  }
   add_polls_ui(out_file, polls)
   add_ui_footer(out_file)
-
+  
+  # Server
   add_server_header(out_file)
+  if (elems$audience_questions) {
+    add_aud_qs_server(out_file)
+  }
   add_polls_server(out_file, polls)
   add_server_footer(out_file)
 
+  # shinyApp call
   add_app_footer(out_file)
 
   invisible(out_file)
@@ -74,6 +81,15 @@ add_app_header <- function(file) {
     "",
     'act_object <- reactiveVal("none")',
     "used_objects <- reactiveVal()",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_aud_qs_vars <- function(file) {
+  cat(paste(
+    "aud_qs <- reactiveVal()",
     "",
     "",
     sep = "\n"
@@ -108,17 +124,23 @@ add_ui_header <- function(file) {
   ), file = file, append = TRUE)
 }
 
-add_obj_selector_ui <- function(out_file, polls) {
+add_obj_selector_ui <- function(out_file, elems) {
+  polls <- elems$polls
+  
+  objs <- lapply(seq_along(polls), function(i) {
+    paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
+  })
+  
+  if (elems$audience_questions) {
+    objs <- c(
+      objs, paste0('      "Audience Questions" = "aud_qs"'))
+  }
+  
   cat(paste(
     "  conditionalPanel(",
     '    "(output.is_viewer==true)",',
     '    selectInput(inputId = "act_obj", label = "", choices = c(',
-    paste(
-      lapply(seq_along(polls), function(i) {
-        paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
-      }),
-      collapse = ",\n"
-    ),
+    paste(objs, collapse = ",\n"),
     "    )),",
     '    align = "center"',
     "  ),",
@@ -126,6 +148,23 @@ add_obj_selector_ui <- function(out_file, polls) {
     "",
     sep = "\n"
   ), file = out_file, append = TRUE)
+}
+
+add_aud_qs_ui <- function(file) {
+  cat(paste(
+    "  conditionalPanel(",
+    '    "(output.is_viewer==false)",',
+    '    h2(actionLink("aud_qs", label = "", icon = icon("question-circle"))),',
+    '    align = "center"',
+    "  ),",
+    "  conditionalPanel(",
+    '    "(output.is_viewer==true) && (output.act_object==\'aud_qs\')",',
+    '    verbatimTextOutput("aud_qs_viewer")',
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
 }
 
 add_polls_ui <- function(file, polls) {
@@ -204,6 +243,60 @@ add_server_header <- function(file) {
     "    act_object()",
     "  })",
     '  outputOptions(output, "act_object", suspendWhenHidden = FALSE)',
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_aud_qs_server <- function(file) {
+  cat(paste(
+    "  observeEvent(input$aud_qs, {",
+    "    showModal(modalDialog(",
+    '      title = "Question",',
+    '      textInput("q_name", "Your name", "Anonymous"),',
+    '      textAreaInput("q_question", "", placeholder = "Type your question"),',
+    "      footer = fluidRow(",
+    '        actionButton("send_q", label = "Send"),',
+    '        modalButton("Dismiss"),',
+    '        align = "center"',
+    "      ),",
+    "      easyClose = TRUE,",
+    '      size = "s"',
+    "    ))",
+    "  })",
+    "",
+    "  observeEvent(input$send_q, {",
+    '    if (input$q_question == "") {',
+    '      showNotification("Please enter your question", type = "error")',
+    "      return()",
+    "    }",
+    "    question <- data.frame(",
+    "      user = curr_user,",
+    "      name = input$q_name,",
+    # '      time = format(Sys.time(), "%I:%M %p"),',
+    '      time = format(Sys.time(), "%H:%M"),',
+    "      question = trimws(input$q_question)",
+    "    )",
+    "    aud_qs(rbind(question, aud_qs()))",
+    "    removeModal()",
+    '    showNotification("Question sent", type = "message")',
+    "  })",
+    "",
+    "  output$aud_qs_viewer <- renderText({",
+    "    aud_qs <- aud_qs()",
+    "    if (is.null(aud_qs) || nrow(aud_qs) == 0) {",
+    '      return("")',
+    "    }",
+    "    paste(",
+    "      apply(aud_qs, 1, function(x) paste0(",
+    '        x["name"], "\\t",',
+    '        x["time"], "\\n",',
+    '        x["question"]',
+    "      )),",
+    '      collapse = "\\n\\n-----------------------------------\\n\\n"',
+    "    )",
+    "  })",
     "",
     "",
     sep = "\n"

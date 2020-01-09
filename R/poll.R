@@ -1,8 +1,7 @@
 #' Add a poll to the slide
 #'
 #' Adds a poll to the current slide. It will return the corresponding `iframe`
-#' tag which will show the poll results. At the moment, just one poll per slide
-#' is allowed.
+#' tag which will show the poll results.
 #'
 #' @param question A character -string- representing the poll question.
 #' @param options A character vector with the possible poll answers.

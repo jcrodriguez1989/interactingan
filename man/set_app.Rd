@@ -26,4 +26,5 @@ A QR code image that will point to the server url.
 app must be hosted on any Shiny server, by default it will try to use
 [shinyapps.io](shinyapps.io).
 Calling this function will reset all existing interaction objects.
+At the moment, just one interactive object per slide is allowed.
 }

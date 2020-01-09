@@ -3,8 +3,14 @@
 Elems <- setRefClass(
   "Elems",
   fields = list(
-    polls = "list"
-  )
+    polls = "list",
+    audience_questions = "logical"
+  ),
+  methods = list(
+    initialize = function() {
+      .self$audience_questions <- FALSE
+      .self
+    })
 )
 elems <- Elems$new()
 

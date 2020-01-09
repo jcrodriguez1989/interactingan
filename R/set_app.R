@@ -4,6 +4,7 @@
 #' app must be hosted on any Shiny server, by default it will try to use
 #' [shinyapps.io](shinyapps.io).
 #' Calling this function will reset all existing interaction objects.
+#' At the moment, just one interactive object per slide is allowed.
 #'
 #' @param app_name A character -string- with the name of the Shiny app to
 #'   create. Must be unique in your Shiny server, or it will overwrite it.
@@ -21,6 +22,7 @@
 #'
 set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
   elems$polls <- list()
+  elems$audience_questions <- FALSE
   res_params <- list(
     app_name = app_name,
     key = key,
