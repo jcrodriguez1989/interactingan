@@ -3,5 +3,6 @@
 export(deploy_interactions)
 export(poll)
 export(set_app)
-import(qrcode)
+import(ggplot2)
+importFrom(qrcode,qrcode_gen)
 importFrom(rsconnect,deployApp)

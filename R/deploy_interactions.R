@@ -119,7 +119,8 @@ add_obj_selector_ui <- function(out_file, polls) {
       }),
       collapse = ",\n"
     ),
-    "    ))",
+    "    )),",
+    '    align = "center"',
     "  ),",
     "",
     "",
@@ -172,13 +173,18 @@ add_ui_footer <- function(file) {
 }
 
 add_server_header <- function(file) {
+  key <- app_info$params$key
   cat(paste(
     "server <- function(input, output, session) {",
     "  curr_user <-",
     '    paste0(session$request$REMOTE_ADDR, ":", session$request$REMOTE_PORT)',
     "",
     "  output$is_viewer <- reactive({",
-    '    !is.null(getQueryString()$viewer) && getQueryString()$viewer == "TRUE"',
+    paste0(
+      '    !is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
+      key,
+      '"'
+    ),
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",
@@ -186,7 +192,11 @@ add_server_header <- function(file) {
     "    getQueryString()",
     "    input$act_obj",
     "  }, {",
-    '    if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "TRUE") {',
+    paste0(
+      '    if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
+      key,
+      '") {'
+    ),
     "      act_object(input$act_obj)",
     "    }",
     "  })",

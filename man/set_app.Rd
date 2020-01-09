@@ -4,11 +4,14 @@
 \alias{set_app}
 \title{Set up the interactions server}
 \usage{
-set_app(app_name = "presentation", url = NULL, ...)
+set_app(app_name = "presentation", key = "IACC", url = NULL, ...)
 }
 \arguments{
 \item{app_name}{A character -string- with the name of the Shiny app to
 create. Must be unique in your Shiny server, or it will overwrite it.}
+
+\item{key}{A character -string- with a personal key to access interactions 
+viewer.}
 
 \item{url}{A character -string- (optional) to provide a valid existing
 `interactingan` server instance that was previously configured.}
