@@ -17,6 +17,6 @@ audience_questions <- function(width = "100%", height = "500px") {
     app_info$params$url,
     "?viewer=",
     app_info$params$key,
-    '" frameborder="0" scrolling="no"></iframe>'
+    '" frameborder="0"></iframe>'
   )
 }
