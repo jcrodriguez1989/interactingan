@@ -15,7 +15,8 @@ audience_questions <- function(width = "100%", height = "500px") {
   paste0(
     '<iframe width="', width, '" height="', height, '" src="',
     app_info$params$url,
-    "?viewer=TRUE",
+    "?viewer=",
+    app_info$params$key,
     '" frameborder="0" scrolling="no"></iframe>'
   )
 }

@@ -127,9 +127,12 @@ add_ui_header <- function(file) {
 add_obj_selector_ui <- function(out_file, elems) {
   polls <- elems$polls
   
-  objs <- lapply(seq_along(polls), function(i) {
-    paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
-  })
+  objs <- c(
+    '      "Select object" = "empty"',
+    lapply(seq_along(polls), function(i) {
+      paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
+    })
+  )
   
   if (elems$audience_questions) {
     objs <- c(
@@ -251,11 +254,20 @@ add_server_header <- function(file) {
 
 add_aud_qs_server <- function(file) {
   cat(paste(
+    "  max_aud_q_chars <- 160",
     "  observeEvent(input$aud_qs, {",
     "    showModal(modalDialog(",
     '      title = "Question",',
     '      textInput("q_name", "Your name", "Anonymous"),',
-    '      textAreaInput("q_question", "", placeholder = "Type your question"),',
+    "      textAreaInput(",
+    '        "q_question",',
+    '        "",',
+    "        placeholder = paste0(",
+    '          "Type your question (max of ",',
+    "          max_aud_q_chars,",
+    '          " characters)"',
+    "        )",
+    "      ),",
     "      footer = fluidRow(",
     '        actionButton("send_q", label = "Send"),',
     '        modalButton("Dismiss"),',
@@ -267,8 +279,22 @@ add_aud_qs_server <- function(file) {
     "  })",
     "",
     "  observeEvent(input$send_q, {",
-    '    if (input$q_question == "") {',
+    "    question <- trimws(input$q_question)",
+    '    if (question == "") {',
     '      showNotification("Please enter your question", type = "error")',
+    "      return()",
+    "    }",
+    "    if (nchar(question) > max_aud_q_chars) {",
+    "      showNotification(",
+    "        paste0(",
+    '          "Too many characters: ",',
+    "          nchar(question),",
+    '          " (max of ",',
+    "          max_aud_q_chars,",
+    '          ")"',
+    "        ),",
+    '        type = "error"',
+    "      )",
     "      return()",
     "    }",
     "    question <- data.frame(",
@@ -276,9 +302,9 @@ add_aud_qs_server <- function(file) {
     "      name = input$q_name,",
     # '      time = format(Sys.time(), "%I:%M %p"),',
     '      time = format(Sys.time(), "%H:%M"),',
-    "      question = trimws(input$q_question)",
+    "      question = question",
     "    )",
-    "    aud_qs(rbind(question, aud_qs()))",
+    "    aud_qs(rbind(aud_qs(), question))",
     "    removeModal()",
     '    showNotification("Question sent", type = "message")',
     "  })",
