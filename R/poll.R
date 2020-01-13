@@ -14,9 +14,11 @@
 #' @export
 #'
 poll <- function(question, options, width = "100%", height = "500px") {
-  act_polls <- elems$polls
-  curr_id <- max(c(0, as.numeric(unlist(lapply(act_polls, function(act_poll) {
-    strsplit(act_poll@id, "_")[[1]][[2]]
+  act_objs <- elems$objects
+  curr_id <- max(c(0, as.numeric(unlist(lapply(act_objs, function(act_obj) {
+    if (is(act_obj, "Poll")) {
+      strsplit(act_obj@id, "_")[[1]][[2]]
+    }
   })))))
   new_id <- paste0("poll_", curr_id + 1)
   new_poll <- Poll(
@@ -24,7 +26,7 @@ poll <- function(question, options, width = "100%", height = "500px") {
     question = question,
     options = as.character(options)
   )
-  elems$polls <- append(act_polls, new_poll)
+  elems$objects <- append(act_objs, new_poll)
   paste0(
     '<iframe width="', width, '" height="', height, '" src="',
     app_info$params$url,

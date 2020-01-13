@@ -21,7 +21,7 @@
 #' @export
 #'
 set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
-  elems$polls <- list()
+  elems$objects <- list()
   elems$audience_questions <- FALSE
   res_params <- list(
     app_name = app_name,

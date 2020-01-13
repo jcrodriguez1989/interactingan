@@ -44,28 +44,28 @@ create_shiny_file <- function(out_file) {
   # Shiny app header (includes)
   add_app_header(out_file)
 
+  objects <- elems$objects
+  polls <- objects[unlist(lapply(objects, is, "Poll"))]
+  wordclouds <- objects[unlist(lapply(objects, is, "Wordcloud"))]
+
   # Global vars
-  polls <- elems$polls
-  if (elems$audience_questions) {
-    add_aud_qs_vars(out_file)
-  }
+  add_aud_qs_vars(out_file, elems$audience_questions)
   add_polls_vars(out_file, polls)
+  add_wordclouds_vars(out_file, wordclouds)
 
   # UI
   add_ui_header(out_file)
   add_obj_selector_ui(out_file, elems)
-  if (elems$audience_questions) {
-    add_aud_qs_ui(out_file)
-  }
+  add_aud_qs_ui(out_file, elems$audience_questions)
   add_polls_ui(out_file, polls)
+  add_wordclouds_ui(out_file, wordclouds)
   add_ui_footer(out_file)
 
   # Server
   add_server_header(out_file)
-  if (elems$audience_questions) {
-    add_aud_qs_server(out_file)
-  }
+  add_aud_qs_server(out_file, elems$audience_questions)
   add_polls_server(out_file, polls)
+  add_wordclouds_server(out_file, wordclouds)
   add_server_footer(out_file)
 
   # shinyApp call
@@ -91,17 +91,21 @@ add_app_header <- function(file) {
     "avatars_url <- ",
     '  "https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/"',
     "",
-    "# currently selected object by the viewer user",
-    'act_object <- reactiveVal("none")',
     "# connected users",
     "users <- reactiveVal()",
+    "# currently selected object by the viewer user",
+    'act_object <- reactiveVal("none")',
     "",
     "",
     sep = "\n"
   ), file = file, append = TRUE)
 }
 
-add_aud_qs_vars <- function(file) {
+add_aud_qs_vars <- function(file, aud_qs) {
+  if (!aud_qs) {
+    return()
+  }
+
   cat(paste(
     "# audience questions",
     "aud_qs <- reactiveVal()",
@@ -132,6 +136,23 @@ add_poll_vars <- function(poll, file) {
   ), file = file, append = TRUE)
 }
 
+add_wordclouds_vars <- function(file, wordclouds) {
+  if (length(wordclouds) == 0) {
+    return()
+  }
+
+  cat('library("wordcloud")\n\n', file = file, append = TRUE)
+  cat(paste(
+    "# words that each user selected",
+    paste0(
+      lapply(wordclouds, function(x) x@id), "_ans", " <- reactiveVal(list())"
+    ),
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
 add_ui_header <- function(file) {
   cat(paste(
     "ui <- fluidPage(",
@@ -142,12 +163,12 @@ add_ui_header <- function(file) {
 }
 
 add_obj_selector_ui <- function(out_file, elems) {
-  polls <- elems$polls
+  objects <- elems$objects
 
   objs <- c(
     '      "Select object" = "empty"',
-    lapply(seq_along(polls), function(i) {
-      paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
+    lapply(seq_along(objects), function(i) {
+      paste0('      "', objects[[i]]@question, '" = "', objects[[i]]@id, '"')
     })
   )
 
@@ -172,7 +193,11 @@ add_obj_selector_ui <- function(out_file, elems) {
   ), file = out_file, append = TRUE)
 }
 
-add_aud_qs_ui <- function(file) {
+add_aud_qs_ui <- function(file, aud_qs) {
+  if (!aud_qs) {
+    return()
+  }
+
   cat(paste(
     "  # button for audience to ask questions",
     "  conditionalPanel(",
@@ -194,15 +219,19 @@ add_aud_qs_ui <- function(file) {
 
 add_polls_ui <- function(file, polls) {
   lapply(polls, add_poll_ui, file)
-  cat("  NULL
-", file = file, append = TRUE)
 }
 
 add_poll_ui <- function(poll, file) {
   cat(paste(
     "  # poll voting buttons",
     "  conditionalPanel(",
-    paste0('    "(output.is_viewer==false) && (output.act_object==\'', poll@id, "') && (output.done_", poll@id, '==false)",'),
+    paste0(
+      '    "(output.is_viewer==false) && (output.act_object==\'',
+      poll@id,
+      "') && (output.done_",
+      poll@id,
+      '==false)",'
+    ),
     paste0('    h3("', poll@question, '"),'),
     paste0(
       '    fluidRow(actionButton(inputId = "', poll@id, "_opt_",
@@ -223,6 +252,53 @@ add_poll_ui <- function(poll, file) {
       '\')",'
     ),
     paste0('    plotOutput("', poll@id, '")'),
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_wordclouds_ui <- function(file, wordclouds) {
+  lapply(wordclouds, add_wordcloud_ui, file)
+}
+
+add_wordcloud_ui <- function(wordcloud, file) {
+  cat(paste(
+    "  # wordcloud input",
+    "  conditionalPanel(",
+    paste0(
+      '    "(output.is_viewer==false) && (output.act_object==\'',
+      wordcloud@id,
+      "') && (output.done_",
+      wordcloud@id,
+      '==false)",'
+    ),
+    paste0('    h3("', wordcloud@question, '"),'),
+    paste(
+      "    textAreaInput(",
+      paste0('      "', wordcloud@id, '_words",'),
+      paste0(
+        '      label = "Words (up to ',
+        wordcloud@max_words,
+        ' words)",'
+      ),
+      '      placeholder = "Type your words (separated by comma) ..."',
+      "    ),",
+      paste0('    actionButton("', wordcloud@id, '_send", "Send"),'),
+      sep = "\n"
+    ),
+    '    align = "center"',
+    "  ),",
+    "",
+    "  # wordcloud results plot",
+    "  conditionalPanel(",
+    paste0(
+      '    "(output.is_viewer==true) && (output.act_object==\'',
+      wordcloud@id,
+      '\')",'
+    ),
+    paste0('    plotOutput("', wordcloud@id, '")'),
     "  ),",
     "",
     "",
@@ -340,7 +416,11 @@ add_server_header <- function(file) {
   ), file = file, append = TRUE)
 }
 
-add_aud_qs_server <- function(file) {
+add_aud_qs_server <- function(file, aud_qs) {
+  if (!aud_qs) {
+    return()
+  }
+
   cat(paste(
     "  # audience question form (max of 160 chars per question)",
     "  max_aud_q_chars <- 160",
@@ -445,7 +525,11 @@ add_poll_server <- function(poll, file) {
     paste0("  output$done_", poll@id, " <- reactive({"),
     paste0("    curr_user$id %in% unlist(", poll@id, "_ans())"),
     "  })",
-    paste0('  outputOptions(output, "done_', poll@id, '", suspendWhenHidden = FALSE)'),
+    paste0(
+      '  outputOptions(output, "done_',
+      poll@id,
+      '", suspendWhenHidden = FALSE)'
+    ),
     "",
     "",
     sep = "\n", collapse = ""
@@ -474,7 +558,7 @@ add_poll_server <- function(poll, file) {
     paste0("    act_ans <- ", poll@id, "_ans()"),
     '    opts <- gsub("opt_", "", names(act_ans))',
     "    act_ans <- data.frame(",
-    '      Option = factor(opts, levels = opts),', 
+    "      Option = factor(opts, levels = opts),",
     "      N = unlist(lapply(act_ans, length))",
     "    )",
     "    act_ans$Votes <- 100 * act_ans$N / max(1, sum(act_ans$N))",
@@ -486,6 +570,72 @@ add_poll_server <- function(poll, file) {
     "        text = element_text(size = 30)",
     "      ) +",
     "      scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))",
+    "  })",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_wordclouds_server <- function(file, wordclouds) {
+  invisible(lapply(wordclouds, add_wordcloud_server, file))
+}
+
+add_wordcloud_server <- function(wordcloud, file) {
+  cat(paste(
+    "  # check if the current user has used this wordcloud",
+    paste0("  output$done_", wordcloud@id, " <- reactive({"),
+    paste0("    curr_user$id %in% names(", wordcloud@id, "_ans())"),
+    "  })",
+    paste0(
+      '  outputOptions(output, "done_',
+      wordcloud@id,
+      '", suspendWhenHidden = FALSE)'
+    ),
+    "",
+    "",
+    sep = "\n", collapse = ""
+  ), file = file, append = TRUE)
+
+  cat(paste(
+    "  # for each answer, save the voters name and words",
+    paste0("  observeEvent(input$", wordcloud@id, "_send, {"),
+    paste0("    words <- input$", wordcloud@id, "_words"),
+    '    words <- trimws(strsplit(words, ",")[[1]])',
+    "    if (length(words) == 0) {",
+    '      showNotification("Please enter your words", type = "error")',
+    "      return()",
+    "    }",
+    paste0(
+      "    words <- words[seq_len(min(length(words), ",
+      wordcloud@max_words,
+      "))]"
+    ),
+    paste0("    act_ans <- ", wordcloud@id, "_ans()"),
+    "    act_ans[[curr_user$id]] <- words",
+    paste0("    ", wordcloud@id, "_ans(act_ans)"),
+    "  })",
+    "",
+    sep = "\n", collapse = ""
+  ), file = file, append = TRUE)
+
+  # default parameters for wordcloud plot
+  wc_params <- list(
+    min.freq = "1", random.order = "FALSE", colors = 'brewer.pal(8, "Dark2")'
+  )
+  wc_params[names(wordcloud@dots)] <- wordcloud@dots
+  cat(paste(
+    "  # create the wordcloud answers plot",
+    paste0("  output$", wordcloud@id, " <- renderPlot({"),
+    paste0("    act_ans <- table(unlist(", wordcloud@id, "_ans()))"),
+    "    if (length(act_ans) == 0) {",
+    "      return()",
+    "    }",
+    "    wordcloud(",
+    "      names(act_ans),",
+    "      as.vector(act_ans),",
+    paste("      ", names(wc_params), "=", wc_params, collapse = ",\n"),
+    "    )",
     "  })",
     "",
     "",

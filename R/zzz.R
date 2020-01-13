@@ -3,7 +3,7 @@
 Elems <- setRefClass(
   "Elems",
   fields = list(
-    polls = "list",
+    objects = "list",
     audience_questions = "logical"
   ),
   methods = list(
