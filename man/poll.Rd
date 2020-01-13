@@ -4,12 +4,21 @@
 \alias{poll}
 \title{Add a poll to the slide}
 \usage{
-poll(question, options, width = "100\%", height = "500px")
+poll(
+  question,
+  options,
+  multiple_opts = FALSE,
+  width = "100\%",
+  height = "500px"
+)
 }
 \arguments{
 \item{question}{A character -string- representing the poll question.}
 
 \item{options}{A character vector with the possible poll answers.}
+
+\item{multiple_opts}{A logical indicating if multiple options can be
+selected.}
 
 \item{width}{A character with a valid html `width` value for the iframe.}
 

@@ -6,6 +6,8 @@
 #'
 #' @param question A character -string- representing the poll question.
 #' @param options A character vector with the possible poll answers.
+#' @param multiple_opts A logical indicating if multiple options can be
+#'   selected.
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.
 #'
@@ -13,7 +15,8 @@
 #'
 #' @export
 #'
-poll <- function(question, options, width = "100%", height = "500px") {
+poll <- function(question, options, multiple_opts = FALSE, width = "100%",
+                 height = "500px") {
   act_objs <- elems$objects
   curr_id <- max(c(0, as.numeric(unlist(lapply(act_objs, function(act_obj) {
     if (is(act_obj, "Poll")) {
@@ -24,7 +27,8 @@ poll <- function(question, options, width = "100%", height = "500px") {
   new_poll <- Poll(
     id = new_id,
     question = question,
-    options = as.character(options)
+    options = as.character(options),
+    multiple = multiple_opts
   )
   elems$objects <- append(act_objs, new_poll)
   paste0(
@@ -40,6 +44,7 @@ Poll <- setClass("Poll",
   slots = c(
     id = "character",
     question = "character",
-    options = "character"
+    options = "character",
+    multiple = "logical"
   )
 )
