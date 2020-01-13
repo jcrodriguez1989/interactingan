@@ -120,9 +120,9 @@ add_poll_vars <- function(poll, file) {
     "# users that voted for each answer",
     paste0(poll@id, "_ans", " <- reactiveVal(list("),
     paste0(
-      "  opt_",
+      "  `opt_",
       poll@options,
-      c(rep(" = NULL,", length(poll@options) - 1), " = NULL"),
+      c(rep("` = NULL,", length(poll@options) - 1), "` = NULL"),
       collapse = "\n"
     ),
     "))",
@@ -453,14 +453,14 @@ add_poll_server <- function(poll, file) {
 
   cat(paste(
     "  # for each answer, save the voters ids",
-    paste0("  observeEvent(input$", poll@id, "_opt_", poll@options, ", {"),
+    paste0("  observeEvent(input$`", poll@id, "_opt_", poll@options, "`, {"),
     paste0("    act_ans <- ", poll@id, "_ans()"),
     paste0(
-      "    act_ans$opt_",
+      "    act_ans$`opt_",
       poll@options,
-      " <- unique(c(act_ans$opt_",
+      "` <- unique(c(act_ans$`opt_",
       poll@options,
-      ", curr_user$id))"
+      "`, curr_user$id))"
     ),
     paste0("    ", poll@id, "_ans(act_ans)"),
     "  })",
