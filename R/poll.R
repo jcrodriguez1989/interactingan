@@ -2,6 +2,7 @@
 #'
 #' Adds a poll to the current slide. It will return the corresponding `iframe`
 #' tag which will show the poll results.
+#' This function must be called once per poll.
 #'
 #' @param question A character -string- representing the poll question.
 #' @param options A character vector with the possible poll answers.

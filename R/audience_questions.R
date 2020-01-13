@@ -2,6 +2,8 @@
 #'
 #' Allows audience questions. It will return the corresponding `iframe` tag 
 #' which will show a questions viewer pane to the current slide.
+#' This function can be called several times, it will return the viewer pane
+#' for each time it is called.
 #'
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.

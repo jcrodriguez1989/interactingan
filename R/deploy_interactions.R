@@ -9,7 +9,7 @@ deploy_interactions <- function() {
   # create a random folder for the app to deploy
   app_dir <- paste0(tempdir(), "/app")
   out_file <- paste0(app_dir, "/app.R")
-  
+
   dir.create(app_dir, showWarnings = FALSE)
   unlink(out_file)
 
@@ -59,7 +59,7 @@ create_shiny_file <- function(out_file) {
   }
   add_polls_ui(out_file, polls)
   add_ui_footer(out_file)
-  
+
   # Server
   add_server_header(out_file)
   if (elems$audience_questions) {
@@ -79,6 +79,7 @@ add_app_header <- function(file) {
     'library("ggplot2")',
     'library("shiny")',
     "",
+    "# get RStudio hex stickers urls from GitHub (to use as profile pics)",
     'avatars <- readLines("https://github.com/rstudio/hex-stickers/tree/master/PNG")',
     "avatars <- avatars[",
     '  grep(\'" href="/rstudio/hex-stickers/blob/master/PNG/.*\\\\.png\', avatars)',
@@ -90,8 +91,9 @@ add_app_header <- function(file) {
     "avatars_url <- ",
     '  "https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/"',
     "",
+    "# currently selected object by the viewer user",
     'act_object <- reactiveVal("none")',
-    "used_objects <- reactiveVal()",
+    "# connected users",
     "users <- reactiveVal()",
     "",
     "",
@@ -101,6 +103,7 @@ add_app_header <- function(file) {
 
 add_aud_qs_vars <- function(file) {
   cat(paste(
+    "# audience questions",
     "aud_qs <- reactiveVal()",
     "",
     "",
@@ -114,11 +117,12 @@ add_polls_vars <- function(file, polls) {
 
 add_poll_vars <- function(poll, file) {
   cat(paste(
+    "# users that voted for each answer",
     paste0(poll@id, "_ans", " <- reactiveVal(list("),
     paste0(
       "  opt_",
       poll@options,
-      c(rep(" = 0,", length(poll@options) - 1), " = 0"),
+      c(rep(" = NULL,", length(poll@options) - 1), " = NULL"),
       collapse = "\n"
     ),
     "))",
@@ -139,20 +143,22 @@ add_ui_header <- function(file) {
 
 add_obj_selector_ui <- function(out_file, elems) {
   polls <- elems$polls
-  
+
   objs <- c(
     '      "Select object" = "empty"',
     lapply(seq_along(polls), function(i) {
       paste0('      "', polls[[i]]@question, '" = "', polls[[i]]@id, '"')
     })
   )
-  
+
   if (elems$audience_questions) {
     objs <- c(
-      objs, paste0('      "Audience Questions" = "aud_qs"'))
+      objs, paste0('      "Audience Questions" = "aud_qs"')
+    )
   }
-  
+
   cat(paste(
+    "  # if it is the viewer user, then show the interactive object selector",
     "  conditionalPanel(",
     '    "(output.is_viewer==true)",',
     '    selectInput(inputId = "act_obj", label = "", choices = c(',
@@ -168,11 +174,14 @@ add_obj_selector_ui <- function(out_file, elems) {
 
 add_aud_qs_ui <- function(file) {
   cat(paste(
+    "  # button for audience to ask questions",
     "  conditionalPanel(",
     '    "(output.is_viewer==false)",',
     '    h2(actionLink("aud_qs", label = "", icon = icon("question-circle"))),',
     '    align = "center"',
     "  ),",
+    "",
+    "  # questions viewer pane",
     "  conditionalPanel(",
     '    "(output.is_viewer==true) && (output.act_object==\'aud_qs\')",',
     '    uiOutput("aud_qs_viewer")',
@@ -191,6 +200,7 @@ add_polls_ui <- function(file, polls) {
 
 add_poll_ui <- function(poll, file) {
   cat(paste(
+    "  # poll voting buttons",
     "  conditionalPanel(",
     paste0('    "(output.is_viewer==false) && (output.act_object==\'', poll@id, "') && (output.done_", poll@id, '==false)",'),
     paste0('    h3("', poll@question, '"),'),
@@ -204,6 +214,8 @@ add_poll_ui <- function(poll, file) {
     ),
     '    align = "center"',
     "  ),",
+    "",
+    "  # poll results plot",
     "  conditionalPanel(",
     paste0(
       '    "(output.is_viewer==true) && (output.act_object==\'',
@@ -231,6 +243,7 @@ add_server_header <- function(file) {
   key <- app_info$params$key
   cat(paste(
     "server <- function(input, output, session) {",
+    "  # set user info, with random name and avatar",
     "  rand_prof <- sample(avatars, 1)",
     "  curr_user <-",
     "    data.frame(",
@@ -242,6 +255,7 @@ add_server_header <- function(file) {
     "      stringsAsFactors = FALSE",
     "    )",
     "",
+    "  # if it is an audience user, then let it select avatar and name",
     "  observeEvent(getQueryString(), {",
     paste0(
       '    if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
@@ -250,11 +264,14 @@ add_server_header <- function(file) {
     ),
     "      return()",
     "    }",
+    "",
+    "    # if the user previously logged in, then assign previous profile",
     "    if (curr_user$id %in% users()$id) {",
     "      users <- users()",
     "      curr_user <- users[users$id == curr_user$id,, drop = FALSE]",
     "      return()",
     "    }",
+    "",
     "    showModal(modalDialog(",
     '      title = "My profile",',
     "      fluidRow(",
@@ -290,6 +307,7 @@ add_server_header <- function(file) {
     "    })",
     "  })",
     "",
+    "  # is_viewer checks if it is the slides viewer user",
     "  output$is_viewer <- reactive({",
     paste0(
       '    !is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
@@ -299,6 +317,7 @@ add_server_header <- function(file) {
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",
+    "  # show the selected object",
     "  observeEvent({",
     "    getQueryString()",
     "    input$act_obj",
@@ -323,6 +342,7 @@ add_server_header <- function(file) {
 
 add_aud_qs_server <- function(file) {
   cat(paste(
+    "  # audience question form (max of 160 chars per question)",
     "  max_aud_q_chars <- 160",
     "  observeEvent(input$aud_qs, {",
     "    showModal(modalDialog(",
@@ -388,6 +408,7 @@ add_aud_qs_server <- function(file) {
     '    showNotification("Question sent", type = "message")',
     "  })",
     "",
+    "  # show the questions, nicely printed in the pane",
     "  output$aud_qs_viewer <- renderUI({",
     "    aud_qs <- aud_qs()",
     "    if (is.null(aud_qs) || nrow(aud_qs) == 0) {",
@@ -420,8 +441,9 @@ add_polls_server <- function(file, polls) {
 
 add_poll_server <- function(poll, file) {
   cat(paste(
+    "  # check if the current user has already voted this poll",
     paste0("  output$done_", poll@id, " <- reactive({"),
-    paste0("    curr_user$id %in% used_objects()$", poll@id),
+    paste0("    curr_user$id %in% unlist(", poll@id, "_ans())"),
     "  })",
     paste0('  outputOptions(output, "done_', poll@id, '", suspendWhenHidden = FALSE)'),
     "",
@@ -430,23 +452,29 @@ add_poll_server <- function(poll, file) {
   ), file = file, append = TRUE)
 
   cat(paste(
+    "  # for each answer, save the voters ids",
     paste0("  observeEvent(input$", poll@id, "_opt_", poll@options, ", {"),
     paste0("    act_ans <- ", poll@id, "_ans()"),
-    paste0("    act_ans$opt_", poll@options, " <- act_ans$opt_", poll@options, " + 1"),
+    paste0(
+      "    act_ans$opt_",
+      poll@options,
+      " <- unique(c(act_ans$opt_",
+      poll@options,
+      ", curr_user$id))"
+    ),
     paste0("    ", poll@id, "_ans(act_ans)"),
-    "    new_used <- used_objects()",
-    paste0("    new_used$", poll@id, " <- c(new_used$", poll@id, ", curr_user$id)"),
-    "    used_objects(new_used)",
     "  })",
     "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
 
   cat(paste(
+    "  # create the poll answers plot",
     paste0("  output$", poll@id, " <- renderPlot({"),
     paste0("    act_ans <- ", poll@id, "_ans()"),
     "    act_ans <- data.frame(",
-    '      Option = gsub("opt_", "", names(act_ans)), N = unlist(act_ans)',
+    '      Option = gsub("opt_", "", names(act_ans)),', 
+    "      N = unlist(lapply(act_ans, length))",
     "    )",
     "    act_ans$Votes <- 100 * act_ans$N / max(1, sum(act_ans$N))",
     "    ggplot(act_ans) +",

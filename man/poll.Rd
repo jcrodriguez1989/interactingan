@@ -21,4 +21,5 @@ An html `iframe` tag which will show the poll results.
 \description{
 Adds a poll to the current slide. It will return the corresponding `iframe`
 tag which will show the poll results.
+This function must be called once per poll.
 }

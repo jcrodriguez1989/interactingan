@@ -17,4 +17,6 @@ An html `iframe` tag which will show the questions done.
 \description{
 Allows audience questions. It will return the corresponding `iframe` tag 
 which will show a questions viewer pane to the current slide.
+This function can be called several times, it will return the viewer pane
+for each time it is called.
 }
