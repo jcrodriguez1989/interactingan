@@ -3,9 +3,13 @@
 #' Deploys all created interaction objects to the, `interactingan` Shiny server,
 #' previously configured by the `set_app` function.
 #'
+#' @param theme A character -string- with the name of the theme to use for the
+#'   Shiny app. Must be "default" or any valid name for 
+#'   `shinythemes::shinytheme(theme)`.
+#'
 #' @export
 #'
-deploy_interactions <- function() {
+deploy_interactions <- function(theme = "spacelab") {
   # create a random folder for the app to deploy
   app_dir <- paste0(tempdir(), "/app")
   out_file <- paste0(app_dir, "/app.R")
@@ -13,7 +17,7 @@ deploy_interactions <- function() {
   dir.create(app_dir, showWarnings = FALSE)
   unlink(out_file)
 
-  create_shiny_file(out_file)
+  create_shiny_file(out_file, theme)
 
   if (app_info$params$deployed) {
     dots <- app_info$params$dots
@@ -40,7 +44,7 @@ deploy_interactions <- function() {
   invisible(out_file)
 }
 
-create_shiny_file <- function(out_file) {
+create_shiny_file <- function(out_file, theme) {
   # Shiny app header (includes)
   add_app_header(out_file)
 
@@ -54,7 +58,7 @@ create_shiny_file <- function(out_file) {
   add_wordclouds_vars(out_file, wordclouds)
 
   # UI
-  add_ui_header(out_file)
+  add_ui_header(out_file, theme)
   add_obj_selector_ui(out_file, elems)
   add_aud_qs_ui(out_file, elems$audience_questions)
   add_polls_ui(out_file, polls)
@@ -153,10 +157,16 @@ add_wordclouds_vars <- function(file, wordclouds) {
   ), file = file, append = TRUE)
 }
 
-add_ui_header <- function(file) {
+add_ui_header <- function(file, theme) {
   cat(paste(
     "ui <- fluidPage(",
     paste0('  title = "interactingan: ', app_info$params$app_name, '",'),
+    ifelse(
+      theme != "default",
+      paste0('  theme = shinythemes::shinytheme("', theme, '"),'),
+      ""
+    ),
+    "",
     "",
     sep = "\n"
   ), file = file, append = TRUE)
@@ -587,7 +597,7 @@ add_wordclouds_server <- function(file, wordclouds) {
 
 add_wordcloud_server <- function(wordcloud, file) {
   cat(paste(
-    "  # check if the current user has used this wordcloud",
+    "  # check if the current user has submited to this wordcloud",
     paste0("  output$done_", wordcloud@id, " <- reactive({"),
     paste0("    curr_user()$id %in% names(", wordcloud@id, "_ans())"),
     "  })",
