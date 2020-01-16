@@ -1,10 +1,16 @@
 `interactingan`: Interactive Presentation Ninja
 ================
 
-Create, in your `xaringan` slides, interactions with the audience.
+Have you ever tried [slido](https://www.sli.do/) or
+[Mentimeter](https://www.mentimeter.com/)? So you know how useful are,
+for teaching or conferences, having audience interactive slides. But,
+you also love using your `xaringan` slides.
 
-It can also be used with any other RMarkdown document that returns html
-results.
+Now, thanks to `interactingan`, it is possible to incorporate
+interactive objects into your `xaringan` presentations\!
+
+(It can also be used with any other RMarkdown document that returns html
+results)
 
 ## Installation
 
