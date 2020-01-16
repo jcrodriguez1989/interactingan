@@ -9,6 +9,8 @@
 #' @param hide_selector A logical indicating if the object selector should be
 #'   shown on the top of each object.
 #'
+#' @importFrom utils capture.output
+#'
 #' @export
 #'
 deploy_interactions <- function(theme = "spacelab", hide_selector = TRUE) {
@@ -46,6 +48,7 @@ deploy_interactions <- function(theme = "spacelab", hide_selector = TRUE) {
   invisible(out_file)
 }
 
+#' @importFrom methods is
 create_shiny_file <- function(out_file, theme, hide_selector) {
   # Shiny app header (includes)
   add_app_header(out_file)

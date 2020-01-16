@@ -1,5 +1,6 @@
 # class and global object that contains all the interactive elements of the
 # presentation
+#' @importFrom methods new
 Elems <- setRefClass(
   "Elems",
   fields = list(
@@ -16,6 +17,7 @@ elems <- Elems$new()
 
 # class and global object that contains the information related to the app
 # server
+#' @importFrom methods new
 AppInfo <- setRefClass(
   "AppInfo",
   fields = list(

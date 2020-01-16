@@ -93,6 +93,7 @@ qr_gen <- function(text) {
   qr_matrix[1:2] <- lapply(qr_matrix[1:2], as.numeric)
   qr_matrix <- qr_matrix[qr_matrix$Freq == 1, ]
 
+  Var1 <- Var2 <- NULL # to avoid R CMD check warnings
   ggp <- ggplot(qr_matrix, aes(Var1, Var2))
   ggp + geom_tile() + theme_void() + theme(aspect.ratio = 1)
 }

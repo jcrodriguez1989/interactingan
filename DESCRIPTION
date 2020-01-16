@@ -7,15 +7,22 @@ Authors@R: c(
         role = c("aut", "cre"), email = "jcrodriguez@unc.edu.ar")
     )
 Maintainer: Juan Cruz Rodriguez <jcrodriguez@unc.edu.ar>
-Description: Create public interactions in your xaringan slides. Can also be 
-    used with any other RMarkdown document that returns html output.
+Description: Create, in your xaringan slides, interactions with the audience. It
+    can also be used with any other RMarkdown document that returns html
+    results.
 License: MIT + file LICENSE
 URL: https://github.com/jcrodriguez1989/interactingan
 BugReports: https://github.com/jcrodriguez1989/interactingan/issues
 Encoding: UTF-8
 Imports:
     ggplot2,
+    methods,
     qrcode,
     rsconnect
+Suggests:
+    shiny,
+    shinythemes,
+    wordcloud,
+    xaringan
 LazyData: true
 RoxygenNote: 7.0.2
