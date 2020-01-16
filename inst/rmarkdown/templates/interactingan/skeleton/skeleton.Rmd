@@ -1,0 +1,47 @@
+---
+title: "Interactive Presentation Ninja"
+subtitle: "⚔<br/>with interactingan"
+author: "Juan Cruz Rodriguez"
+institute: "FAMAF - UNC"
+date: "2020/01/10 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Connect to the app!
+
+```{r echo=FALSE, message=FALSE, fig.align='center'}
+library("interactingan")
+# Will configure an empty app to the shinyapps server;
+# and show a qr code that points to the interactingan app url
+set_app()
+```
+
+---
+
+# Which R package you use most?
+
+`r interactingan::wordcloud("Most used R package", max_words = 1)`
+
+---
+
+# Have you ever used interactive slides?
+
+`r poll("Do you use interactive slides?", c("Yes", "No", "Won't answer!"))`
+
+---
+
+# Questions?
+
+<!-- Show the audience question's pane -->
+`r audience_questions()`
+
+```{r echo=FALSE}
+# Deploys the final interactingan app to the shinyapps server
+deploy_interactions()
+```

@@ -1,0 +1,4 @@
+name: Interactive Ninja Presentation
+description: >
+  Create an interactive presentation using interactingan, and the xaringan package based on remark.js.
+create_dir: false
