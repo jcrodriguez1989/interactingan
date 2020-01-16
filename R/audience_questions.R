@@ -14,11 +14,22 @@
 #'
 audience_questions <- function(width = "100%", height = "500px") {
   elems$audience_questions <- TRUE
+  new_id <- "aud_qs"
   paste0(
-    '<iframe width="', width, '" height="', height, '" src="',
+    '<p align="center"><button id="',
+    new_id,
+    '_btn" onClick=\'document.getElementById("',
+    new_id,
+    '_frame").src = "',
     app_info$params$url,
     "?viewer=",
     app_info$params$key,
-    '" frameborder="0"></iframe>'
+    "&object=",
+    new_id,
+    '";document.getElementById("',
+    new_id,
+    '_btn").style.display = "none";\'>Load audience questions</button></p><iframe id="',
+    new_id,
+    '_frame" width="100%" height="500px" frameborder="0" scrolling="no"></iframe>'
   )
 }

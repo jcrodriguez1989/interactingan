@@ -32,11 +32,21 @@ poll <- function(question, options, multiple_opts = FALSE, width = "100%",
   )
   elems$objects <- append(act_objs, new_poll)
   paste0(
-    '<iframe width="', width, '" height="', height, '" src="',
+    '<p align="center"><button id="',
+    new_id,
+    '_btn" onClick=\'document.getElementById("',
+    new_id,
+    '_frame").src = "',
     app_info$params$url,
     "?viewer=",
     app_info$params$key,
-    '" frameborder="0" scrolling="no"></iframe>'
+    "&object=",
+    new_id,
+    '";document.getElementById("',
+    new_id,
+    '_btn").style.display = "none";\'>Load poll</button></p><iframe id="',
+    new_id,
+    '_frame" width="100%" height="500px" frameborder="0" scrolling="no"></iframe>'
   )
 }
 

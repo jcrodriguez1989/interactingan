@@ -4,12 +4,15 @@
 \alias{deploy_interactions}
 \title{Deploy all interactions to the server}
 \usage{
-deploy_interactions(theme = "spacelab")
+deploy_interactions(theme = "spacelab", hide_selector = TRUE)
 }
 \arguments{
 \item{theme}{A character -string- with the name of the theme to use for the
 Shiny app. Must be "default" or any valid name for 
 `shinythemes::shinytheme(theme)`.}
+
+\item{hide_selector}{A logical indicating if the object selector should be
+shown on the top of each object.}
 }
 \description{
 Deploys all created interaction objects to the, `interactingan` Shiny server,

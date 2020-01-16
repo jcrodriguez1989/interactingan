@@ -6,10 +6,12 @@
 #' @param theme A character -string- with the name of the theme to use for the
 #'   Shiny app. Must be "default" or any valid name for 
 #'   `shinythemes::shinytheme(theme)`.
+#' @param hide_selector A logical indicating if the object selector should be
+#'   shown on the top of each object.
 #'
 #' @export
 #'
-deploy_interactions <- function(theme = "spacelab") {
+deploy_interactions <- function(theme = "spacelab", hide_selector = TRUE) {
   # create a random folder for the app to deploy
   app_dir <- paste0(tempdir(), "/app")
   out_file <- paste0(app_dir, "/app.R")
@@ -17,7 +19,7 @@ deploy_interactions <- function(theme = "spacelab") {
   dir.create(app_dir, showWarnings = FALSE)
   unlink(out_file)
 
-  create_shiny_file(out_file, theme)
+  create_shiny_file(out_file, theme, hide_selector)
 
   if (app_info$params$deployed) {
     dots <- app_info$params$dots
@@ -44,7 +46,7 @@ deploy_interactions <- function(theme = "spacelab") {
   invisible(out_file)
 }
 
-create_shiny_file <- function(out_file, theme) {
+create_shiny_file <- function(out_file, theme, hide_selector) {
   # Shiny app header (includes)
   add_app_header(out_file)
 
@@ -59,7 +61,7 @@ create_shiny_file <- function(out_file, theme) {
 
   # UI
   add_ui_header(out_file, theme)
-  add_obj_selector_ui(out_file, elems)
+  add_obj_selector_ui(out_file, elems, hide_selector)
   add_aud_qs_ui(out_file, elems$audience_questions)
   add_polls_ui(out_file, polls)
   add_wordclouds_ui(out_file, wordclouds)
@@ -172,7 +174,7 @@ add_ui_header <- function(file, theme) {
   ), file = file, append = TRUE)
 }
 
-add_obj_selector_ui <- function(out_file, elems) {
+add_obj_selector_ui <- function(out_file, elems, hide_selector) {
   objects <- elems$objects
 
   objs <- c(
@@ -191,7 +193,7 @@ add_obj_selector_ui <- function(out_file, elems) {
   cat(paste(
     "  # if it is the viewer user, then show the interactive object selector",
     "  conditionalPanel(",
-    '    "(output.is_viewer==true)",',
+    paste0('    "(output.is_viewer==true) && ', tolower(!hide_selector), '",'),
     '    selectInput(inputId = "act_obj", label = "", choices = c(',
     paste(objs, collapse = ",\n"),
     "    )),",
@@ -313,7 +315,7 @@ add_wordcloud_ui <- function(wordcloud, file) {
       wordcloud@id,
       '\')",'
     ),
-    paste0('    plotOutput("', wordcloud@id, '")'),
+    paste0('    wellPanel(plotOutput("', wordcloud@id, '"))'),
     "  ),",
     "",
     "",
@@ -427,6 +429,17 @@ add_server_header <- function(file) {
     "    act_object()",
     "  })",
     '  outputOptions(output, "act_object", suspendWhenHidden = FALSE)',
+    "",
+    "  # allow object selector through url",
+    "  observeEvent(getQueryString(), {",
+    "    if (",
+    "      !is.null(getQueryString()$viewer) &&",
+    paste0('      getQueryString()$viewer == "', key, '" &&'),
+    "      !is.null(getQueryString()$object)",
+    "    ) {",
+    '      updateSelectInput(session, "act_obj", selected = getQueryString()$object)',
+    "    }",
+    "  })",
     "",
     "",
     sep = "\n"
