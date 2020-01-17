@@ -8,7 +8,7 @@
 #'
 #' @param app_name A character -string- with the name of the Shiny app to
 #'   create. Must be unique in your Shiny server, or it will overwrite it.
-#' @param key A character -string- with a personal key to access interactions 
+#' @param key A character -string- with a personal key to access interactions
 #'   viewer.
 #' @param url A character -string- (optional) to provide a valid existing
 #'   `interactingan` server instance that was previously configured.
@@ -22,7 +22,7 @@
 #'
 set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
   elems$objects <- list()
-  elems$audience_questions <- FALSE
+  elems$audience_questions <- AudQs(enabled = FALSE, allow_anonymous = TRUE)
   res_params <- list(
     app_name = app_name,
     key = key,

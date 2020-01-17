@@ -50,7 +50,8 @@ wordcloud <- function(question, max_words = 2,
   )
 }
 
-Wordcloud <- setClass("Wordcloud",
+Wordcloud <- setClass(
+  "Wordcloud",
   slots = c(
     id = "character",
     question = "character",

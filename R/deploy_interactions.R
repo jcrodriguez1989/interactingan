@@ -4,7 +4,7 @@
 #' previously configured by the `set_app` function.
 #'
 #' @param theme A character -string- with the name of the theme to use for the
-#'   Shiny app. Must be "default" or any valid name for 
+#'   Shiny app. Must be "default" or any valid name for
 #'   `shinythemes::shinytheme(theme)`.
 #' @param hide_selector A logical indicating if the object selector should be
 #'   shown on the top of each object.
@@ -111,7 +111,7 @@ add_app_header <- function(file) {
 }
 
 add_aud_qs_vars <- function(file, aud_qs) {
-  if (!aud_qs) {
+  if (!aud_qs@enabled) {
     return()
   }
 
@@ -187,7 +187,7 @@ add_obj_selector_ui <- function(out_file, elems, hide_selector) {
     })
   )
 
-  if (elems$audience_questions) {
+  if (elems$audience_questions@enabled) {
     objs <- c(
       objs, paste0('      "Audience Questions" = "aud_qs"')
     )
@@ -209,7 +209,7 @@ add_obj_selector_ui <- function(out_file, elems, hide_selector) {
 }
 
 add_aud_qs_ui <- function(file, aud_qs) {
-  if (!aud_qs) {
+  if (!aud_qs@enabled) {
     return()
   }
 
@@ -248,7 +248,7 @@ add_poll_ui <- function(poll, file) {
       '==false)",'
     ),
     paste0('    h3("', poll@question, '"),'),
-    '    selectInput(',
+    "    selectInput(",
     paste0('      inputId = "', poll@id, '_sel",'),
     '      label = "",',
     paste0(
@@ -450,10 +450,11 @@ add_server_header <- function(file) {
 }
 
 add_aud_qs_server <- function(file, aud_qs) {
-  if (!aud_qs) {
+  if (!aud_qs@enabled) {
     return()
   }
 
+  allow_anon <- elems$audience_questions@allow_anonymous
   cat(paste(
     "  # audience question form (max of 160 chars per question)",
     "  max_aud_q_chars <- 160",
@@ -467,7 +468,7 @@ add_aud_qs_server <- function(file, aud_qs) {
     "        '.png\" height=\"40\" width=\"40\">'",
     "      )),",
     "      curr_user()$name,",
-    '      checkboxInput("q_anonymous", "Anonymous"),',
+    if (allow_anon) '      checkboxInput("q_anonymous", "Anonymous"),',
     "      textAreaInput(",
     '        "q_question",',
     '        "",',
@@ -509,8 +510,16 @@ add_aud_qs_server <- function(file, aud_qs) {
     "    }",
     "    question <- data.frame(",
     "      user = curr_user()$id,",
-    '      name = ifelse(input$q_anonymous, "Anonymous", curr_user()$name),',
-    '      avatar = ifelse(input$q_anonymous, "", curr_user()$avatar),',
+    if (allow_anon) {
+      '      name = ifelse(input$q_anonymous, "Anonymous", curr_user()$name),'
+    } else {
+      "      name = curr_user()$name,"
+    },
+    if (allow_anon) {
+      '      avatar = ifelse(input$q_anonymous, "", curr_user()$avatar),'
+    } else {
+      "      avatar = curr_user()$avatar,"
+    },
     # '      time = format(Sys.time(), "%I:%M %p"),',
     '      time = format(Sys.time(), "%H:%M"),',
     "      question = question,",
@@ -586,7 +595,7 @@ add_poll_server <- function(poll, file) {
     "  # create the poll answers plot",
     paste0("  output$", poll@id, " <- renderPlot({"),
     paste0("    act_ans <- ", poll@id, "_ans()"),
-    '    opts <- names(act_ans)',
+    "    opts <- names(act_ans)",
     "    act_ans <- data.frame(",
     "      Option = factor(opts, levels = opts),",
     "      N = unlist(lapply(act_ans, length))",

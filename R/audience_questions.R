@@ -1,10 +1,12 @@
 #' Allow audience questions
 #'
-#' Allows audience questions. It will return the corresponding `iframe` tag 
+#' Allows audience questions. It will return the corresponding `iframe` tag
 #' which will show a questions viewer pane to the current slide.
 #' This function can be called several times, it will return the viewer pane
 #' for each time it is called.
 #'
+#' @param allow_anonymous A logical indicating if audience can ask questions as
+#'   an anonymous user.
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.
 #'
@@ -12,8 +14,12 @@
 #'
 #' @export
 #'
-audience_questions <- function(width = "100%", height = "500px") {
-  elems$audience_questions <- TRUE
+audience_questions <- function(allow_anonymous = TRUE, width = "100%",
+                               height = "500px") {
+  elems$audience_questions <- AudQs(
+    enabled = TRUE,
+    allow_anonymous = allow_anonymous
+  )
   new_id <- "aud_qs"
   paste0(
     '<p align="center"><button id="',

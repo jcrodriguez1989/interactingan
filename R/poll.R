@@ -50,7 +50,8 @@ poll <- function(question, options, multiple_opts = FALSE, width = "100%",
   )
 }
 
-Poll <- setClass("Poll",
+Poll <- setClass(
+  "Poll",
   slots = c(
     id = "character",
     question = "character",

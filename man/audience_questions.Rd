@@ -4,9 +4,12 @@
 \alias{audience_questions}
 \title{Allow audience questions}
 \usage{
-audience_questions(width = "100\%", height = "500px")
+audience_questions(allow_anonymous = TRUE, width = "100\%", height = "500px")
 }
 \arguments{
+\item{allow_anonymous}{A logical indicating if audience can ask questions as
+an anonymous user.}
+
 \item{width}{A character with a valid html `width` value for the iframe.}
 
 \item{height}{A character with a valid html `height` value for the iframe.}
@@ -15,7 +18,7 @@ audience_questions(width = "100\%", height = "500px")
 An html `iframe` tag which will show the questions done.
 }
 \description{
-Allows audience questions. It will return the corresponding `iframe` tag 
+Allows audience questions. It will return the corresponding `iframe` tag
 which will show a questions viewer pane to the current slide.
 This function can be called several times, it will return the viewer pane
 for each time it is called.
