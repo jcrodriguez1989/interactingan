@@ -49,7 +49,10 @@ set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
 
   if (!conn_success ||
     !any(grepl("Application successfully deployed to ", output))) {
-    stop("Could not set app. Make sure `rsconnect` is well configured.")
+    stop(paste0(
+      "Could not set app. Make sure `rsconnect` is well configured:\n",
+      "https://docs.rstudio.com/shinyapps.io/getting-started.html#configure-rsconnect"
+    ))
   }
 
   conn_url <- output[grepl("Application successfully deployed to ", output)]

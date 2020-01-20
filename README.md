@@ -35,5 +35,6 @@ Template*
 Select **Interactive Ninja Presentation** and press **OK**.
 
 This will open an `interactingan` presentation template, if you have
-already configured your `rsconnect` account, then this template is ready
-to get **Knit**ted.
+already [configured your `rsconnect`
+account](https://docs.rstudio.com/shinyapps.io/getting-started.html#configure-rsconnect),
+then this template is ready to get **Knit**ted.

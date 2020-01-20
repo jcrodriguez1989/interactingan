@@ -10,7 +10,7 @@ set_app(app_name = "presentation", key = "IACC", url = NULL, ...)
 \item{app_name}{A character -string- with the name of the Shiny app to
 create. Must be unique in your Shiny server, or it will overwrite it.}
 
-\item{key}{A character -string- with a personal key to access interactions 
+\item{key}{A character -string- with a personal key to access interactions
 viewer.}
 
 \item{url}{A character -string- (optional) to provide a valid existing
