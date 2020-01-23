@@ -118,7 +118,9 @@ add_poll_ui <- function(poll, file) {
     "  # poll results plot",
     "  conditionalPanel(",
     paste0(
-      '    "(output.is_viewer==true) && (output.act_object==\'',
+      '    "((output.is_viewer==true) || (output.done_',
+      poll@id,
+      '==true)) && (output.act_object==\'',
       poll@id,
       '\')",'
     ),

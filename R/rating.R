@@ -106,7 +106,9 @@ add_rating_ui <- function(rating, file) {
     "  # rating results plot",
     "  conditionalPanel(",
     paste0(
-      '    "(output.is_viewer==true) && (output.act_object==\'',
+      '    "((output.is_viewer==true) || (output.done_',
+      rating@id,
+      '==true)) && (output.act_object==\'',
       rating@id,
       '\')",'
     ),

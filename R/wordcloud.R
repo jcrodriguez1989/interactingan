@@ -114,7 +114,9 @@ add_wordcloud_ui <- function(wordcloud, file) {
     "  # wordcloud results plot",
     "  conditionalPanel(",
     paste0(
-      '    "(output.is_viewer==true) && (output.act_object==\'',
+      '    "((output.is_viewer==true) || (output.done_',
+      wordcloud@id,
+      '==true)) && (output.act_object==\'',
       wordcloud@id,
       '\')",'
     ),
@@ -180,6 +182,7 @@ add_wordcloud_server <- function(wordcloud, file) {
     "    if (length(act_ans) == 0) {",
     "      return()",
     "    }",
+    "    set.seed(8818) # so everyone gets the same cloud",
     "    wordcloud(",
     "      names(act_ans),",
     "      as.vector(act_ans),",
