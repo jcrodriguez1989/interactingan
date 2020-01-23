@@ -59,11 +59,13 @@ create_shiny_file <- function(out_file, theme, hide_selector) {
   objects <- elems$objects
   polls <- objects[unlist(lapply(objects, is, "Poll"))]
   wordclouds <- objects[unlist(lapply(objects, is, "Wordcloud"))]
+  ratings <- objects[unlist(lapply(objects, is, "Rating"))]
 
   # Global vars
   add_aud_qs_vars(out_file, elems$audience_questions)
   add_polls_vars(out_file, polls)
   add_wordclouds_vars(out_file, wordclouds)
+  add_ratings_vars(out_file, ratings)
 
   # UI
   add_ui_header(out_file, theme)
@@ -71,6 +73,7 @@ create_shiny_file <- function(out_file, theme, hide_selector) {
   add_aud_qs_ui(out_file, elems$audience_questions)
   add_polls_ui(out_file, polls)
   add_wordclouds_ui(out_file, wordclouds)
+  add_ratings_ui(out_file, ratings)
   add_ui_footer(out_file)
 
   # Server
@@ -78,6 +81,7 @@ create_shiny_file <- function(out_file, theme, hide_selector) {
   add_aud_qs_server(out_file, elems$audience_questions)
   add_polls_server(out_file, polls)
   add_wordclouds_server(out_file, wordclouds)
+  add_ratings_server(out_file, ratings)
   add_server_footer(out_file)
 
   # shinyApp call

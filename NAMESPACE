@@ -3,6 +3,7 @@
 export(audience_questions)
 export(deploy_interactions)
 export(poll)
+export(rating)
 export(set_app)
 export(wordcloud)
 import(ggplot2)

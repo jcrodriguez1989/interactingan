@@ -89,7 +89,7 @@ add_polls_ui <- function(file, polls) {
 
 add_poll_ui <- function(poll, file) {
   cat(paste(
-    "  # poll voting buttons",
+    "  # poll voting selections",
     "  conditionalPanel(",
     paste0(
       '    "(output.is_viewer==false) && (output.act_object==\'',

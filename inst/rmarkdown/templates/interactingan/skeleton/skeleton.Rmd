@@ -36,6 +36,12 @@ set_app()
 
 ---
 
+# How much do you like the `interactingan` package?
+
+`r rating("Rate interactingan?")`
+
+---
+
 # Questions?
 
 <!-- Show the audience question's pane -->

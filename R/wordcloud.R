@@ -147,7 +147,7 @@ add_wordcloud_server <- function(wordcloud, file) {
   ), file = file, append = TRUE)
   
   cat(paste(
-    "  # for each answer, save the voters name and words",
+    "  # for each answer, save the voters id and words",
     paste0("  observeEvent(input$", wordcloud@id, "_send, {"),
     paste0("    words <- input$", wordcloud@id, "_words"),
     '    words <- trimws(strsplit(words, ",")[[1]])',
