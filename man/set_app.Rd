@@ -14,7 +14,9 @@ create. Must be unique in your Shiny server, or it will overwrite it.}
 viewer.}
 
 \item{url}{A character -string- (optional) to provide a valid existing
-`interactingan` server instance that was previously configured.}
+`interactingan` server instance that was previously configured. For
+instance, if the `interactingan` server app is going to be deployed in an
+own Shiny server.}
 
 \item{...}{Additional parameters passed to `rsconnect::deployApp` function.}
 }

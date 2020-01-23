@@ -4,11 +4,18 @@
 \alias{audience_questions}
 \title{Allow audience questions}
 \usage{
-audience_questions(allow_anonymous = TRUE, width = "100\%", height = "500px")
+audience_questions(
+  allow_anonymous = TRUE,
+  max_chars = 160,
+  width = "100\%",
+  height = "500px"
+)
 }
 \arguments{
 \item{allow_anonymous}{A logical indicating if audience can ask questions as
 an anonymous user.}
+
+\item{max_chars}{A numeric indicating max characters allowed per question.}
 
 \item{width}{A character with a valid html `width` value for the iframe.}
 

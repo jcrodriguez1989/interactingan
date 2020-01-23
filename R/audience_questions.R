@@ -7,6 +7,7 @@
 #'
 #' @param allow_anonymous A logical indicating if audience can ask questions as
 #'   an anonymous user.
+#' @param max_chars A numeric indicating max characters allowed per question.
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.
 #'
@@ -14,11 +15,12 @@
 #'
 #' @export
 #'
-audience_questions <- function(allow_anonymous = TRUE, width = "100%",
-                               height = "500px") {
+audience_questions <- function(allow_anonymous = TRUE, max_chars = 160,
+                               width = "100%", height = "500px") {
   elems$audience_questions <- AudQs(
     enabled = TRUE,
-    allow_anonymous = allow_anonymous
+    allow_anonymous = allow_anonymous,
+    max_chars = max_chars
   )
   new_id <- "aud_qs"
   paste0(

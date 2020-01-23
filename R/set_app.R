@@ -11,7 +11,9 @@
 #' @param key A character -string- with a personal key to access interactions
 #'   viewer.
 #' @param url A character -string- (optional) to provide a valid existing
-#'   `interactingan` server instance that was previously configured.
+#'   `interactingan` server instance that was previously configured. For
+#'   instance, if the `interactingan` server app is going to be deployed in an
+#'   own Shiny server.
 #' @param ... Additional parameters passed to `rsconnect::deployApp` function.
 #'
 #' @return A QR code image that will point to the server url.
@@ -22,7 +24,9 @@
 #'
 set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
   elems$objects <- list()
-  elems$audience_questions <- AudQs(enabled = FALSE, allow_anonymous = TRUE)
+  elems$audience_questions <- AudQs(
+    enabled = FALSE, allow_anonymous = TRUE, max_chars = 160
+  )
   res_params <- list(
     app_name = app_name,
     key = key,

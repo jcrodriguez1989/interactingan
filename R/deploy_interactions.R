@@ -458,9 +458,14 @@ add_aud_qs_server <- function(file, aud_qs) {
   }
 
   allow_anon <- elems$audience_questions@allow_anonymous
+  max_chars <- elems$audience_questions@max_chars
   cat(paste(
-    "  # audience question form (max of 160 chars per question)",
-    "  max_aud_q_chars <- 160",
+    paste0(
+      "  # audience question form (max of ",
+      max_chars,
+      " chars per question)"
+    ),
+    paste0("  max_aud_q_chars <- ", max_chars),
     "  observeEvent(input$aud_qs, {",
     "    showModal(modalDialog(",
     '      title = "Question",',

@@ -2,7 +2,8 @@ AudQs <- setClass(
   "AudQs",
   slots = c(
     enabled = "logical",
-    allow_anonymous = "logical"
+    allow_anonymous = "logical",
+    max_chars = "numeric"
   )
 )
 
@@ -17,7 +18,9 @@ Elems <- setRefClass(
   ),
   methods = list(
     initialize = function() {
-      .self$audience_questions <- AudQs(enabled = FALSE, allow_anonymous = TRUE)
+      .self$audience_questions <- AudQs(
+        enabled = FALSE, allow_anonymous = TRUE, max_chars = 160
+      )
       .self
     }
   )
