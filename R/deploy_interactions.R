@@ -15,7 +15,7 @@
 #'
 deploy_interactions <- function(theme = "spacelab", hide_selector = TRUE) {
   # create a random folder for the app to deploy
-  app_dir <- paste0(tempdir(), "/app")
+  app_dir <- paste0(app_info$params$out_dir, "/app")
   out_file <- paste0(app_dir, "/app.R")
 
   dir.create(app_dir, showWarnings = FALSE)

@@ -14,6 +14,9 @@
 #'   `interactingan` server instance that was previously configured. For
 #'   instance, if the `interactingan` server app is going to be deployed in an
 #'   own Shiny server.
+#' @param out_dir A character -string- (optional) indicating the path in which
+#'   to save the `interactingan` server app file. It is useful if the app is 
+#'   going to be deployed to an own Shiny server.
 #' @param ... Additional parameters passed to `rsconnect::deployApp` function.
 #'
 #' @return A QR code image that will point to the server url.
@@ -22,15 +25,14 @@
 #'
 #' @export
 #'
-set_app <- function(app_name = "presentation", key = "IACC", url = NULL, ...) {
-  elems$objects <- list()
-  elems$audience_questions <- AudQs(
-    enabled = FALSE, allow_anonymous = TRUE, max_chars = 160
-  )
+set_app <- function(app_name = "presentation", key = "IACC", url = NULL,
+                    out_dir = tempdir(), ...) {
+  elems$initialize()
   res_params <- list(
     app_name = app_name,
     key = key,
     url = url,
+    out_dir = out_dir,
     dots = list(...)
   )
 

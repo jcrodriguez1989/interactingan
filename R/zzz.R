@@ -18,6 +18,7 @@ Elems <- setRefClass(
   ),
   methods = list(
     initialize = function() {
+      .self$objects <- list()
       .self$audience_questions <- AudQs(
         enabled = FALSE, allow_anonymous = TRUE, max_chars = 160
       )
