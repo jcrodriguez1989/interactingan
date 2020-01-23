@@ -185,7 +185,7 @@ add_aud_qs_server <- function(file, aud_qs) {
     "        )),",
     '        h4(x["name"]),',
     "        x[\"time\"],",
-    '        x[\"question\"]',
+    '        HTML(gsub(" ", "&nbsp;", gsub("\n", br(), paste0("\n", x["question"]))))',
     "      )),",
     "    )",
     "  })",
