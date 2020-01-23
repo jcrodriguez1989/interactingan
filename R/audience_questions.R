@@ -41,3 +41,156 @@ audience_questions <- function(allow_anonymous = TRUE, max_chars = 160,
     '_frame" width="100%" height="500px" frameborder="0" scrolling="no"></iframe>'
   )
 }
+
+#### Functions to create the `interactingan` Shiny server app
+
+add_aud_qs_vars <- function(file, aud_qs) {
+  if (!aud_qs@enabled) {
+    return()
+  }
+  
+  cat(paste(
+    "# audience questions",
+    "aud_qs <- reactiveVal()",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_aud_qs_ui <- function(file, aud_qs) {
+  if (!aud_qs@enabled) {
+    return()
+  }
+  
+  cat(paste(
+    "  # button for audience to ask questions",
+    "  conditionalPanel(",
+    '    "(output.is_viewer==false)",',
+    '    h2(actionLink("aud_qs", label = "", icon = icon("question-circle"))),',
+    '    align = "center"',
+    "  ),",
+    "",
+    "  # questions viewer pane",
+    "  conditionalPanel(",
+    '    "(output.is_viewer==true) && (output.act_object==\'aud_qs\')",',
+    '    uiOutput("aud_qs_viewer")',
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_aud_qs_server <- function(file, aud_qs) {
+  if (!aud_qs@enabled) {
+    return()
+  }
+  
+  allow_anon <- elems$audience_questions@allow_anonymous
+  max_chars <- elems$audience_questions@max_chars
+  cat(paste(
+    paste0(
+      "  # audience question form (max of ",
+      max_chars,
+      " chars per question)"
+    ),
+    paste0("  max_aud_q_chars <- ", max_chars),
+    "  observeEvent(input$aud_qs, {",
+    "    showModal(modalDialog(",
+    '      title = "Question",',
+    "      HTML(paste0(",
+    "        '<img src=\"',",
+    "        avatars_url,",
+    "        curr_user()$avatar,",
+    "        '.png\" height=\"40\" width=\"40\">'",
+    "      )),",
+    "      curr_user()$name,",
+    if (allow_anon) '      checkboxInput("q_anonymous", "Anonymous"),',
+    "      textAreaInput(",
+    '        "q_question",',
+    '        "",',
+    "        placeholder = paste0(",
+    '          "Type your question (max of ",',
+    "          max_aud_q_chars,",
+    '          " characters)"',
+    "        )",
+    "      ),",
+    "      footer = fluidRow(",
+    '        actionButton("send_q", label = "Send"),',
+    '        modalButton("Dismiss"),',
+    '        align = "center"',
+    "      ),",
+    "      easyClose = TRUE,",
+    '      size = "s",',
+    '      align = "center"',
+    "    ))",
+    "  })",
+    "",
+    "  observeEvent(input$send_q, {",
+    "    question <- trimws(input$q_question)",
+    '    if (question == "") {',
+    '      showNotification("Please enter your question", type = "error")',
+    "      return()",
+    "    }",
+    "    if (nchar(question) > max_aud_q_chars) {",
+    "      showNotification(",
+    "        paste0(",
+    '          "Too many characters: ",',
+    "          nchar(question),",
+    '          " (max of ",',
+    "          max_aud_q_chars,",
+    '          ")"',
+    "        ),",
+    '        type = "error"',
+    "      )",
+    "      return()",
+    "    }",
+    "    question <- data.frame(",
+    "      user = curr_user()$id,",
+    if (allow_anon) {
+      '      name = ifelse(input$q_anonymous, "Anonymous", curr_user()$name),'
+    } else {
+      "      name = curr_user()$name,"
+    },
+    if (allow_anon) {
+      '      avatar = ifelse(input$q_anonymous, "", curr_user()$avatar),'
+    } else {
+      "      avatar = curr_user()$avatar,"
+    },
+    # '      time = format(Sys.time(), "%I:%M %p"),',
+    '      time = format(Sys.time(), "%H:%M"),',
+    "      question = question,",
+    "      stringsAsFactors = FALSE",
+    "    )",
+    "    aud_qs(rbind(aud_qs(), question))",
+    "    removeModal()",
+    '    showNotification("Question sent", type = "message")',
+    "  })",
+    "",
+    "  # show the questions, nicely printed in the pane",
+    "  output$aud_qs_viewer <- renderUI({",
+    "    aud_qs <- aud_qs()",
+    "    if (is.null(aud_qs) || nrow(aud_qs) == 0) {",
+    "      return(wellPanel())",
+    "    }",
+    # '    wellPanel(style = "overflow-y:scroll; max-height: 300px",',
+    "    wellPanel(",
+    "      apply(aud_qs, 1, function(x) wellPanel(",
+    "        HTML(paste0(",
+    "          '<img src=\"',",
+    "          avatars_url, x[\"avatar\"], '.png\" ',",
+    "          'title=\"', ifelse(x[\"avatar\"] == \"\", \"\", x[\"user\"]),",
+    "          '\" height=\"40\" width=\"40\">'",
+    "        )),",
+    '        h4(x["name"]),',
+    "        x[\"time\"],",
+    '        x[\"question\"]',
+    "      )),",
+    "    )",
+    "  })",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}

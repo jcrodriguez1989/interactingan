@@ -59,3 +59,135 @@ Wordcloud <- setClass(
     dots = "list"
   )
 )
+
+#### Functions to create the `interactingan` Shiny server app
+
+add_wordclouds_vars <- function(file, wordclouds) {
+  if (length(wordclouds) == 0) {
+    return()
+  }
+  
+  cat('library("wordcloud")\n\n', file = file, append = TRUE)
+  cat(paste(
+    "# words that each user selected",
+    paste0(
+      lapply(wordclouds, function(x) x@id), "_ans", " <- reactiveVal(list())"
+    ),
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_wordclouds_ui <- function(file, wordclouds) {
+  lapply(wordclouds, add_wordcloud_ui, file)
+}
+
+add_wordcloud_ui <- function(wordcloud, file) {
+  cat(paste(
+    "  # wordcloud input",
+    "  conditionalPanel(",
+    paste0(
+      '    "(output.is_viewer==false) && (output.act_object==\'',
+      wordcloud@id,
+      "') && (output.done_",
+      wordcloud@id,
+      '==false)",'
+    ),
+    paste0('    h3("', wordcloud@question, '"),'),
+    paste(
+      "    textAreaInput(",
+      paste0('      "', wordcloud@id, '_words",'),
+      paste0(
+        '      label = "Words (up to ',
+        wordcloud@max_words,
+        ' words)",'
+      ),
+      '      placeholder = "Type your words (separated by comma) ..."',
+      "    ),",
+      paste0('    actionButton("', wordcloud@id, '_send", "Send"),'),
+      sep = "\n"
+    ),
+    '    align = "center"',
+    "  ),",
+    "",
+    "  # wordcloud results plot",
+    "  conditionalPanel(",
+    paste0(
+      '    "(output.is_viewer==true) && (output.act_object==\'',
+      wordcloud@id,
+      '\')",'
+    ),
+    paste0('    wellPanel(plotOutput("', wordcloud@id, '"))'),
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
+
+add_wordclouds_server <- function(file, wordclouds) {
+  invisible(lapply(wordclouds, add_wordcloud_server, file))
+}
+
+add_wordcloud_server <- function(wordcloud, file) {
+  cat(paste(
+    "  # check if the current user has submited to this wordcloud",
+    paste0("  output$done_", wordcloud@id, " <- reactive({"),
+    paste0("    curr_user()$id %in% names(", wordcloud@id, "_ans())"),
+    "  })",
+    paste0(
+      '  outputOptions(output, "done_',
+      wordcloud@id,
+      '", suspendWhenHidden = FALSE)'
+    ),
+    "",
+    "",
+    sep = "\n", collapse = ""
+  ), file = file, append = TRUE)
+  
+  cat(paste(
+    "  # for each answer, save the voters name and words",
+    paste0("  observeEvent(input$", wordcloud@id, "_send, {"),
+    paste0("    words <- input$", wordcloud@id, "_words"),
+    '    words <- trimws(strsplit(words, ",")[[1]])',
+    "    if (length(words) == 0) {",
+    '      showNotification("Please enter your words", type = "error")',
+    "      return()",
+    "    }",
+    paste0(
+      "    words <- words[seq_len(min(length(words), ",
+      wordcloud@max_words,
+      "))]"
+    ),
+    paste0("    act_ans <- ", wordcloud@id, "_ans()"),
+    "    act_ans[[curr_user()$id]] <- words",
+    paste0("    ", wordcloud@id, "_ans(act_ans)"),
+    "  })",
+    "",
+    sep = "\n", collapse = ""
+  ), file = file, append = TRUE)
+  
+  # default parameters for wordcloud plot
+  wc_params <- list(
+    min.freq = "1", random.order = "FALSE", colors = 'brewer.pal(8, "Dark2")'
+  )
+  wc_params[names(wordcloud@dots)] <- wordcloud@dots
+  cat(paste(
+    "  # create the wordcloud answers plot",
+    paste0("  output$", wordcloud@id, " <- renderPlot({"),
+    paste0("    act_ans <- table(unlist(", wordcloud@id, "_ans()))"),
+    "    if (length(act_ans) == 0) {",
+    "      return()",
+    "    }",
+    "    wordcloud(",
+    "      names(act_ans),",
+    "      as.vector(act_ans),",
+    paste("      ", names(wc_params), "=", wc_params, collapse = ",\n"),
+    "    )",
+    "  })",
+    "",
+    "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+}
