@@ -38,7 +38,7 @@ set_app()
 
 # How much do you like the `interactingan` package?
 
-`r rating("Rate interactingan?")`
+`r rating("Rate interactingan:")`
 
 ---
 
