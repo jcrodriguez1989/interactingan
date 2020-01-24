@@ -9,7 +9,8 @@ wordcloud(question, max_words = 2, width = "100\%", height = "500px", ...)
 \arguments{
 \item{question}{A character -string- representing the wordcloud question.}
 
-\item{max_words}{A numeric indicating max words allowed per user.}
+\item{max_words}{A numeric indicating max words allowed per user. The minimum
+value will be 1.}
 
 \item{width}{A character with a valid html `width` value for the iframe.}
 

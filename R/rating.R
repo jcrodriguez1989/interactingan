@@ -108,7 +108,7 @@ add_rating_ui <- function(rating, file) {
     paste0(
       '    "((output.is_viewer==true) || (output.done_',
       rating@id,
-      '==true)) && (output.act_object==\'',
+      "==true)) && (output.act_object=='",
       rating@id,
       '\')",'
     ),

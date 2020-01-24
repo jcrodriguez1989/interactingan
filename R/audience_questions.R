@@ -8,6 +8,7 @@
 #' @param allow_anonymous A logical indicating if audience can ask questions as
 #'   an anonymous user.
 #' @param max_chars A numeric indicating max characters allowed per question.
+#'   The minimum value will be 1.
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.
 #'
@@ -17,6 +18,7 @@
 #'
 audience_questions <- function(allow_anonymous = TRUE, max_chars = 160,
                                width = "100%", height = "500px") {
+  max_chars <- as.integer(max(1, max_chars))
   elems$audience_questions <- AudQs(
     enabled = TRUE,
     allow_anonymous = allow_anonymous,
@@ -38,9 +40,18 @@ audience_questions <- function(allow_anonymous = TRUE, max_chars = 160,
     new_id,
     '_btn").style.display = "none";\'>Load audience questions</button></p><iframe id="',
     new_id,
-    '_frame" width="100%" height="500px" frameborder="0" scrolling="no"></iframe>'
+    '_frame" width="100%" height="500px" frameborder="0" scrolling="yes"></iframe>'
   )
 }
+
+AudQs <- setClass(
+  "AudQs",
+  slots = c(
+    enabled = "logical",
+    allow_anonymous = "logical",
+    max_chars = "integer"
+  )
+)
 
 #### Functions to create the `interactingan` Shiny server app
 
@@ -48,7 +59,7 @@ add_aud_qs_vars <- function(file, aud_qs) {
   if (!aud_qs@enabled) {
     return()
   }
-  
+
   cat(paste(
     "# audience questions",
     "aud_qs <- reactiveVal()",
@@ -62,7 +73,7 @@ add_aud_qs_ui <- function(file, aud_qs) {
   if (!aud_qs@enabled) {
     return()
   }
-  
+
   cat(paste(
     "  # button for audience to ask questions",
     "  conditionalPanel(",
@@ -91,7 +102,7 @@ add_aud_qs_server <- function(file, aud_qs) {
   if (!aud_qs@enabled) {
     return()
   }
-  
+
   allow_anon <- elems$audience_questions@allow_anonymous
   max_chars <- elems$audience_questions@max_chars
   cat(paste(
@@ -132,6 +143,10 @@ add_aud_qs_server <- function(file, aud_qs) {
     "    ))",
     "  })",
     "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+
+  cat(paste(
     "  observeEvent(input$send_q, {",
     "    question <- trimws(input$q_question)",
     '    if (question == "") {',
@@ -168,11 +183,18 @@ add_aud_qs_server <- function(file, aud_qs) {
     "      question = question,",
     "      stringsAsFactors = FALSE",
     "    )",
-    "    aud_qs(rbind(aud_qs(), question))",
-    "    removeModal()",
-    '    showNotification("Question sent", type = "message")',
+    "    if (is.null(aud_qs()) || !any(apply(aud_qs(), 1, function(x) all(x == question)))) {",
+    '      # solves when "send" is hit very fast',
+    "      aud_qs(rbind(aud_qs(), question))",
+    "      removeModal()",
+    '      showNotification("Question sent", type = "message")',
+    "    }",
     "  })",
     "",
+    sep = "\n"
+  ), file = file, append = TRUE)
+
+  cat(paste(
     "  # show the questions, nicely printed in the pane",
     "  output$aud_qs_viewer <- renderUI({",
     "    aud_qs <- aud_qs()",

@@ -25,7 +25,7 @@ instance, if the `interactingan` server app is going to be deployed in an
 own Shiny server.}
 
 \item{out_dir}{A character -string- (optional) indicating the path in which
-to save the `interactingan` server app file. It is useful if the app is 
+to save the `interactingan` server app file. It is useful if the app is
 going to be deployed to an own Shiny server.}
 
 \item{...}{Additional parameters passed to `rsconnect::deployApp` function.}

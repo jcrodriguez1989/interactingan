@@ -5,7 +5,8 @@
 #' This function must be called once per wordcloud.
 #'
 #' @param question A character -string- representing the wordcloud question.
-#' @param max_words A numeric indicating max words allowed per user.
+#' @param max_words A numeric indicating max words allowed per user. The minimum
+#'   value will be 1.
 #' @param width A character with a valid html `width` value for the iframe.
 #' @param height A character with a valid html `height` value for the iframe.
 #' @param ... Additional parameters to be passed to wordcloud::wordcloud
@@ -17,6 +18,7 @@
 #'
 wordcloud <- function(question, max_words = 2,
                       width = "100%", height = "500px", ...) {
+  max_words <- as.integer(max(1, max_words))
   act_objs <- elems$objects
   curr_id <- max(c(0, as.numeric(unlist(lapply(act_objs, function(act_obj) {
     if (is(act_obj, "Wordcloud")) {
@@ -27,7 +29,7 @@ wordcloud <- function(question, max_words = 2,
   new_wordcloud <- Wordcloud(
     id = new_id,
     question = question,
-    max_words = max(1, max_words),
+    max_words = max_words,
     dots = list(...)
   )
   elems$objects <- append(act_objs, new_wordcloud)
@@ -55,7 +57,7 @@ Wordcloud <- setClass(
   slots = c(
     id = "character",
     question = "character",
-    max_words = "numeric",
+    max_words = "integer",
     dots = "list"
   )
 )
@@ -66,10 +68,10 @@ add_wordclouds_vars <- function(file, wordclouds) {
   if (length(wordclouds) == 0) {
     return()
   }
-  
+
   cat('library("wordcloud")\n\n', file = file, append = TRUE)
   cat(paste(
-    "# words that each user selected",
+    "# words that each user wrote",
     paste0(
       lapply(wordclouds, function(x) x@id), "_ans", " <- reactiveVal(list())"
     ),
@@ -116,7 +118,7 @@ add_wordcloud_ui <- function(wordcloud, file) {
     paste0(
       '    "((output.is_viewer==true) || (output.done_',
       wordcloud@id,
-      '==true)) && (output.act_object==\'',
+      "==true)) && (output.act_object=='",
       wordcloud@id,
       '\')",'
     ),
@@ -147,7 +149,7 @@ add_wordcloud_server <- function(wordcloud, file) {
     "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
-  
+
   cat(paste(
     "  # for each answer, save the voters id and words",
     paste0("  observeEvent(input$", wordcloud@id, "_send, {"),
@@ -169,7 +171,7 @@ add_wordcloud_server <- function(wordcloud, file) {
     "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
-  
+
   # default parameters for wordcloud plot
   wc_params <- list(
     min.freq = "1", random.order = "FALSE", colors = 'brewer.pal(8, "Dark2")'

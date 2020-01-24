@@ -42,6 +42,12 @@ set_app()
 
 ---
 
+# What do you think about the `interactingan` package?
+
+`r question("Opinion about interactingan:")`
+
+---
+
 # Questions?
 
 <!-- Show the audience question's pane -->

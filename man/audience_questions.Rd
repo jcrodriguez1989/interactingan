@@ -15,7 +15,8 @@ audience_questions(
 \item{allow_anonymous}{A logical indicating if audience can ask questions as
 an anonymous user.}
 
-\item{max_chars}{A numeric indicating max characters allowed per question.}
+\item{max_chars}{A numeric indicating max characters allowed per question.
+The minimum value will be 1.}
 
 \item{width}{A character with a valid html `width` value for the iframe.}
 

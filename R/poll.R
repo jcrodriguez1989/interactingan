@@ -120,7 +120,7 @@ add_poll_ui <- function(poll, file) {
     paste0(
       '    "((output.is_viewer==true) || (output.done_',
       poll@id,
-      '==true)) && (output.act_object==\'',
+      "==true)) && (output.act_object=='",
       poll@id,
       '\')",'
     ),
@@ -151,7 +151,7 @@ add_poll_server <- function(poll, file) {
     "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
-  
+
   cat(paste(
     "  # for each answer, save the voters ids",
     paste0("  observeEvent(input$", poll@id, "_send, {"),
@@ -165,7 +165,7 @@ add_poll_server <- function(poll, file) {
     "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
-  
+
   cat(paste(
     "  # create the poll answers plot",
     paste0("  output$", poll@id, " <- renderPlot({"),
