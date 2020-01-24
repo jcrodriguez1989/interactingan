@@ -25,7 +25,7 @@ rating <- function(question, max_value = 5, width = "100%", height = "500px") {
   new_id <- paste0("rating_", curr_id + 1)
   new_rating <- Rating(
     id = new_id,
-    question = question,
+    question = as.character(question),
     max_value = max_value
   )
   elems$objects <- append(act_objs, new_rating)

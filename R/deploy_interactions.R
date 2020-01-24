@@ -247,12 +247,15 @@ add_server_header <- function(file) {
     "  })",
     "",
     "  # is_viewer checks if it is the slides viewer user",
+    "  is_viewer <- reactiveVal(FALSE)",
     "  output$is_viewer <- reactive({",
+    "    is_viewer(",
     paste0(
-      '    !is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
+      '      !is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
       key,
       '"'
     ),
+    "    )",
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",

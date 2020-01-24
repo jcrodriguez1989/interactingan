@@ -32,7 +32,7 @@ question <- function(question, allow_anonymous = TRUE, allow_multiple = TRUE,
     id = new_id,
     allow_anonymous = allow_anonymous,
     allow_multiple = allow_multiple,
-    question = question,
+    question = as.character(question),
     max_chars = max_chars
   )
   elems$objects <- append(act_objs, new_question)
@@ -213,11 +213,12 @@ add_question_server <- function(question, file) {
       "_ans(), 1, function(x) all(x == question)))) {"
     ),
     '      # solves when "send" is hit very fast',
-    paste0("      ",
-           question@id,
-           "_ans(rbind(",
-           question@id,
-           "_ans(), question))"
+    paste0(
+      "      ",
+      question@id,
+      "_ans(rbind(",
+      question@id,
+      "_ans(), question))"
     ),
     '      showNotification("Question sent", type = "message")',
     paste0(

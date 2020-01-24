@@ -7,6 +7,7 @@
 poll(
   question,
   options,
+  correct_opts = NULL,
   multiple_opts = FALSE,
   width = "100\%",
   height = "500px"
@@ -16,6 +17,9 @@ poll(
 \item{question}{A character -string- representing the poll question.}
 
 \item{options}{A character vector with the possible poll answers.}
+
+\item{correct_opts}{A character vector with the correct poll answers.
+Must be a subset of `options`.}
 
 \item{multiple_opts}{A logical indicating if multiple options can be
 selected.}

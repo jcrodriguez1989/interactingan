@@ -28,7 +28,7 @@ wordcloud <- function(question, max_words = 2,
   new_id <- paste0("wordcloud_", curr_id + 1)
   new_wordcloud <- Wordcloud(
     id = new_id,
-    question = question,
+    question = as.character(question),
     max_words = max_words,
     dots = list(...)
   )

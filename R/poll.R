@@ -6,6 +6,8 @@
 #'
 #' @param question A character -string- representing the poll question.
 #' @param options A character vector with the possible poll answers.
+#' @param correct_opts A character vector with the correct poll answers.
+#'   Must be a subset of `options`.
 #' @param multiple_opts A logical indicating if multiple options can be
 #'   selected.
 #' @param width A character with a valid html `width` value for the iframe.
@@ -15,8 +17,11 @@
 #'
 #' @export
 #'
-poll <- function(question, options, multiple_opts = FALSE, width = "100%",
-                 height = "500px") {
+poll <- function(question, options, correct_opts = NULL, multiple_opts = FALSE,
+                 width = "100%", height = "500px") {
+  if (!is.null(correct_opts) && any(!correct_opts %in% options)) {
+    stop("`correct_opts` must be a subset of `options`")
+  }
   act_objs <- elems$objects
   curr_id <- max(c(0, as.numeric(unlist(lapply(act_objs, function(act_obj) {
     if (is(act_obj, "Poll")) {
@@ -26,8 +31,9 @@ poll <- function(question, options, multiple_opts = FALSE, width = "100%",
   new_id <- paste0("poll_", curr_id + 1)
   new_poll <- Poll(
     id = new_id,
-    question = question,
+    question = as.character(question),
     options = as.character(options),
+    correct = as.character(correct_opts),
     multiple = multiple_opts
   )
   elems$objects <- append(act_objs, new_poll)
@@ -56,6 +62,7 @@ Poll <- setClass(
     id = "character",
     question = "character",
     options = "character",
+    correct = "character",
     multiple = "logical"
   )
 )
@@ -77,6 +84,7 @@ add_poll_vars <- function(poll, file) {
       collapse = "\n"
     ),
     "))",
+    (if (!is.null(poll@correct)) paste0(poll@id, "_show_correct <- reactiveVal(FALSE)")),
     "",
     "",
     sep = "\n"
@@ -124,7 +132,11 @@ add_poll_ui <- function(poll, file) {
       poll@id,
       '\')",'
     ),
-    paste0('    plotOutput("', poll@id, '")'),
+    (if (is.null(poll@options)) {
+      paste0('    plotOutput("', poll@id, '")')
+    } else {
+      paste0('    plotOutput("', poll@id, '", click = "', poll@id, '_click")')
+    }),
     "  ),",
     "",
     "",
@@ -166,23 +178,67 @@ add_poll_server <- function(poll, file) {
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
 
+  if (!is.null(poll@correct)) {
+    cat(paste(
+      paste0("  observeEvent(input$", poll@id, "_click, {"),
+      "    if (is_viewer()) {",
+      paste0("      ", poll@id, "_show_correct(TRUE)"),
+      "    }",
+      "  })",
+      "",
+      sep = "\n", collapse = ""
+    ), file = file, append = TRUE)
+  }
+
   cat(paste(
     "  # create the poll answers plot",
     paste0("  output$", poll@id, " <- renderPlot({"),
     paste0("    act_ans <- ", poll@id, "_ans()"),
     "    opts <- names(act_ans)",
+    (if (!is.null(poll@correct)) {
+      paste0(
+        'correct_opts <- c("',
+        paste(poll@correct, collapse = '", "'),
+        '")'
+      )
+    }),
     "    act_ans <- data.frame(",
     "      Option = factor(opts, levels = opts),",
+    (if (!is.null(poll@correct)) {
+      "      Correct = as.numeric(opts %in% correct_opts),"
+    }
+    ),
     "      N = unlist(lapply(act_ans, length))",
     "    )",
     "    act_ans$Votes <- 100 * act_ans$N / max(1, sum(act_ans$N))",
     "    ggplot(act_ans) +",
-    "      geom_col(aes(x = Option, y = Votes, fill = Option)) +",
+    (if (is.null(poll@correct)) {
+      "      geom_col(aes(x = Option, y = Votes, fill = Option)) +"
+    } else {
+      paste(
+        paste0("      (if (!", poll@id, "_show_correct()) {"),
+        "        geom_col(aes(x = Option, y = Votes, fill = Option))",
+        "      } else {",
+        "        geom_col(aes(x = Option, y = Votes, fill = Option, alpha = Correct))",
+        "      }) +",
+        sep = "\n"
+      )
+    }),
     "      geom_text(aes(x = Option, y = Votes, label = N), size = 12) +",
     "      theme(",
     '        legend.position = "none",',
     "        text = element_text(size = 30)",
     "      ) +",
+    (if (!is.null(poll@correct)) {
+      paste(
+        paste0("      (if (!", poll@id, "_show_correct()) {"),
+        '        ggtitle("Show correct")',
+        "      } else {",
+        '        ggtitle("")',
+        "      }) +",
+        sep = "\n"
+      )
+    }),
     "      scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))",
     "  })",
     "",
