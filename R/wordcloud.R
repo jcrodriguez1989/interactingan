@@ -73,7 +73,8 @@ add_wordclouds_vars <- function(file, wordclouds) {
   cat(paste(
     "# words that each user wrote",
     paste0(
-      lapply(wordclouds, function(x) x@id), "_ans", " <- reactiveVal(list())"
+      lapply(wordclouds, function(x) x@id), "_ans", " <- reactiveVal(list())",
+      collapse = "\n"
     ),
     "",
     "",
@@ -188,7 +189,7 @@ add_wordcloud_server <- function(wordcloud, file) {
     "    wordcloud(",
     "      names(act_ans),",
     "      as.vector(act_ans),",
-    paste("      ", names(wc_params), "=", wc_params, collapse = ",\n"),
+    paste("     ", names(wc_params), "=", wc_params, collapse = ",\n"),
     "    )",
     "  })",
     "",

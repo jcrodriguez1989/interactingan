@@ -71,6 +71,7 @@ create_shiny_file <- function(out_file, theme, hide_selector) {
 
   # UI
   add_ui_header(out_file, theme)
+  add_admin_ui(out_file, elems)
   add_obj_selector_ui(out_file, elems, hide_selector)
   add_aud_qs_ui(out_file, elems$audience_questions)
   add_polls_ui(out_file, polls)
@@ -108,7 +109,7 @@ add_app_header <- function(file) {
     '  "\\\\.png.*", "",',
     '  sub(".*/rstudio/hex-stickers/blob/master/PNG/", "", avatars)',
     "))",
-    "avatars_url <- ",
+    "avatars_url <-",
     '  "https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/"',
     "",
     "# connected users",
@@ -134,6 +135,22 @@ add_ui_header <- function(file, theme) {
     "",
     sep = "\n"
   ), file = file, append = TRUE)
+}
+
+add_admin_ui <- function(out_file, elems) {
+  cat(paste(
+    "  # admin panel",
+    "  conditionalPanel(",
+    '    "(output.is_viewer==true) && (output.is_admin==true)",',
+    "    br(),",
+    "    wellPanel(",
+    '      verbatimTextOutput("admin_panel")',
+    "    )",
+    "  ),",
+    "",
+    "",
+    sep = "\n"
+  ), file = out_file, append = TRUE)
 }
 
 add_obj_selector_ui <- function(out_file, elems, hide_selector) {
@@ -205,7 +222,7 @@ add_server_header <- function(file) {
     "    # if the user previously logged in, then assign previous profile",
     "    if (curr_user()$id %in% users()$id) {",
     "      users <- users()",
-    "      curr_user(users[users$id == curr_user()$id,, drop = FALSE])",
+    "      curr_user(users[users$id == curr_user()$id, , drop = FALSE])",
     "      return()",
     "    }",
     "",
@@ -259,19 +276,36 @@ add_server_header <- function(file) {
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",
+    "  output$is_admin <- reactive({",
+    "    is_viewer() && !is.null(getQueryString()$admin)",
+    "  })",
+    '  outputOptions(output, "is_admin", suspendWhenHidden = FALSE)',
+    "",
+    "  output$admin_panel <- renderText({",
+    "    if (!is.null(users())) {",
+    "      paste0(",
+    '        "Users:\n",',
+    '        paste(apply(users(), 1, paste, collapse = " ; "), collapse = "\n")',
+    "      )",
+    "    }",
+    "  })",
+    "",
     "  # show the selected object",
-    "  observeEvent({",
-    "    getQueryString()",
-    "    input$act_obj",
-    "  }, {",
+    "  observeEvent(",
+    "    {",
+    "      getQueryString()",
+    "      input$act_obj",
+    "    },",
+    "    {",
     paste0(
-      '    if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
+      '      if (!is.null(getQueryString()$viewer) && getQueryString()$viewer == "',
       key,
       '") {'
     ),
-    "      act_object(input$act_obj)",
+    "        act_object(input$act_obj)",
+    "      }",
     "    }",
-    "  })",
+    "  )",
     "  output$act_object <- reactive({",
     "    act_object()",
     "  })",
@@ -281,8 +315,8 @@ add_server_header <- function(file) {
     "  observeEvent(getQueryString(), {",
     "    if (",
     "      !is.null(getQueryString()$viewer) &&",
-    paste0('      getQueryString()$viewer == "', key, '" &&'),
-    "      !is.null(getQueryString()$object)",
+    paste0('        getQueryString()$viewer == "', key, '" &&'),
+    "        !is.null(getQueryString()$object)",
     "    ) {",
     '      updateSelectInput(session, "act_obj", selected = getQueryString()$object)',
     "    }",

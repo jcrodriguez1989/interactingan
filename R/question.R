@@ -76,7 +76,8 @@ add_questions_vars <- function(file, questions) {
   cat(paste(
     "# each user questions",
     paste0(
-      lapply(questions, function(x) x@id), "_ans", " <- reactiveVal()"
+      lapply(questions, function(x) x@id), "_ans", " <- reactiveVal()",
+      collapse = "\n"
     ),
     "",
     "",
@@ -228,6 +229,8 @@ add_question_server <- function(question, file) {
     ),
     "    }",
     "  })",
+    "",
+    "",
     sep = "\n", collapse = ""
   ), file = file, append = TRUE)
 
@@ -240,17 +243,19 @@ add_question_server <- function(question, file) {
     "    }",
     # '    wellPanel(style = "overflow-y:scroll; max-height: 300px",',
     "    wellPanel(",
-    "      apply(act_qs, 1, function(x) wellPanel(",
-    "        HTML(paste0(",
-    "          '<img src=\"',",
-    "          avatars_url, x[\"avatar\"], '.png\" ',",
-    "          'title=\"', ifelse(x[\"avatar\"] == \"\", \"\", x[\"user\"]),",
-    "          '\" height=\"40\" width=\"40\">'",
-    "        )),",
-    '        h4(x["name"]),',
-    "        x[\"time\"],",
-    '        HTML(gsub(" ", "&nbsp;", gsub("\n", br(), paste0("\n", x["question"]))))',
-    "      )),",
+    "      apply(act_qs, 1, function(x) {",
+    "        wellPanel(",
+    "          HTML(paste0(",
+    "            '<img src=\"',",
+    "            avatars_url, x[\"avatar\"], '.png\" ',",
+    "            'title=\"', ifelse(x[\"avatar\"] == \"\", \"\", x[\"user\"]),",
+    "            '\" height=\"40\" width=\"40\">'",
+    "          )),",
+    '          h4(x["name"]),',
+    "          x[\"time\"],",
+    '          HTML(gsub(" ", "&nbsp;", gsub("\\n", br(), paste0("\\n", x["question"]))))',
+    "        )",
+    "      }),",
     "    )",
     "  })",
     "",

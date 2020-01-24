@@ -67,7 +67,8 @@ add_ratings_vars <- function(file, ratings) {
   cat(paste(
     "# rating that each user gave",
     paste0(
-      lapply(ratings, function(x) x@id), "_ans", " <- reactiveVal(list())"
+      lapply(ratings, function(x) x@id), "_ans", " <- reactiveVal(list())",
+      collapse = "\n"
     ),
     "",
     "",

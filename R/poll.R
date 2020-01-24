@@ -197,7 +197,7 @@ add_poll_server <- function(poll, file) {
     "    opts <- names(act_ans)",
     (if (!is.null(poll@correct)) {
       paste0(
-        'correct_opts <- c("',
+        '    correct_opts <- c("',
         paste(poll@correct, collapse = '", "'),
         '")'
       )
@@ -206,8 +206,7 @@ add_poll_server <- function(poll, file) {
     "      Option = factor(opts, levels = opts),",
     (if (!is.null(poll@correct)) {
       "      Correct = as.numeric(opts %in% correct_opts),"
-    }
-    ),
+    }),
     "      N = unlist(lapply(act_ans, length))",
     "    )",
     "    act_ans$Votes <- 100 * act_ans$N / max(1, sum(act_ans$N))",
