@@ -131,6 +131,29 @@ add_wordcloud_ui <- function(wordcloud, file) {
   ), file = file, append = TRUE)
 }
 
+add_wordcloud_admin_panel <- function(wordcloud) {
+  paste(
+    paste0("    if (length(", wordcloud@id, "_ans()) > 0) {"),
+    "      res <- paste0(",
+    "        res,",
+    "        paste(",
+    paste0('          "', wordcloud@question, '",'),
+    paste0(
+      "          paste(names(",
+      wordcloud@id,
+      "_ans()), ",
+      wordcloud@id,
+      '_ans(), collapse = "\\n"),'
+    ),
+    '          sep = "\\n"',
+    "        ),",
+    '        "\\n\\n"',
+    "      )",
+    "    }",
+    sep = "\n"
+  )
+}
+
 add_wordclouds_server <- function(file, wordclouds) {
   invisible(lapply(wordclouds, add_wordcloud_server, file))
 }

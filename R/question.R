@@ -138,6 +138,30 @@ add_question_ui <- function(question, file) {
   ), file = file, append = TRUE)
 }
 
+add_question_admin_panel <- function(question) {
+  paste(
+    paste0("    if (!is.null(", question@id, "_ans())) {"),
+    "      res <- paste0(",
+    "        res,",
+    "        paste(",
+    paste0('          "', question@question, '",'),
+    "          paste(",
+    paste0(
+      "            apply(",
+      question@id,
+      '_ans(), 1, paste, collapse = " || "),'
+    ),
+    '            collapse = "\\n"',
+    "          ),",
+    '          sep = "\\n"',
+    "        ),",
+    '        "\\n\\n"',
+    "      )",
+    "    }",
+    sep = "\n"
+  )
+}
+
 add_questions_server <- function(file, questions) {
   invisible(lapply(questions, add_question_server, file))
 }

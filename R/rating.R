@@ -121,6 +121,25 @@ add_rating_ui <- function(rating, file) {
   ), file = file, append = TRUE)
 }
 
+add_rating_admin_panel <- function(rating) {
+  paste(
+    paste0("    if (length(", rating@id, "_ans()) > 0) {"),
+    paste0("      rating_res <- ", rating@id, "_ans()"),
+    "      rating_res <- by(names(rating_res), unlist(rating_res), as.character)",
+    "      res <- paste0(",
+    "        res,",
+    "        paste(",
+    paste0('          "', rating@question, '",'),
+    '          paste(names(rating_res), rating_res, collapse = "\\n"),',
+    '          sep = "\\n"',
+    "        ),",
+    '        "\\n\\n"',
+    "      )",
+    "    }",
+    sep = "\n"
+  )
+}
+
 add_ratings_server <- function(file, ratings) {
   invisible(lapply(ratings, add_rating_server, file))
 }

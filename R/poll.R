@@ -144,6 +144,30 @@ add_poll_ui <- function(poll, file) {
   ), file = file, append = TRUE)
 }
 
+add_poll_admin_panel <- function(poll) {
+  paste(
+    paste0("    if (length(unlist(", poll@id, "_ans())) > 0) {"),
+    paste0("      poll_ans <- unlist(", poll@id, "_ans())"),
+    "      res <- paste0(",
+    "        res,",
+    "        paste(",
+    paste0('          "', poll@question, '",'),
+    paste0(
+      "          paste(names(",
+      poll@id,
+      "_ans()), ",
+      poll@id,
+      '_ans(), collapse = "\\n"),'
+    ),
+    '          sep = "\\n"',
+    "        ),",
+    '        "\\n\\n"',
+    "      )",
+    "    }",
+    sep = "\n"
+  )
+}
+
 add_polls_server <- function(file, polls) {
   invisible(lapply(polls, add_poll_server, file))
 }

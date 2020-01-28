@@ -201,11 +201,11 @@ add_server_header <- function(file) {
     "  rand_prof <- sample(avatars, 1)",
     "  curr_user <-",
     "    reactiveVal(data.frame(",
-    "      avatar = rand_prof,",
-    "      name = rand_prof,",
     "      id = paste0(",
     '        session$request$REMOTE_ADDR, ":", session$request$REMOTE_PORT',
     "      ),",
+    "      name = rand_prof,",
+    "      avatar = rand_prof,",
     "      stringsAsFactors = FALSE",
     "    ))",
     "",
@@ -276,19 +276,7 @@ add_server_header <- function(file) {
     "  })",
     '  outputOptions(output, "is_viewer", suspendWhenHidden = FALSE)',
     "",
-    "  output$is_admin <- reactive({",
-    "    is_viewer() && !is.null(getQueryString()$admin)",
-    "  })",
-    '  outputOptions(output, "is_admin", suspendWhenHidden = FALSE)',
-    "",
-    "  output$admin_panel <- renderText({",
-    "    if (!is.null(users())) {",
-    "      paste0(",
-    '        "Users:\n",',
-    '        paste(apply(users(), 1, paste, collapse = " ; "), collapse = "\n")',
-    "      )",
-    "    }",
-    "  })",
+    add_server_admin_panel(),
     "",
     "  # show the selected object",
     "  observeEvent(",
@@ -325,6 +313,67 @@ add_server_header <- function(file) {
     "",
     sep = "\n"
   ), file = file, append = TRUE)
+}
+
+add_server_admin_panel <- function() {
+  paste(
+    "  output$is_admin <- reactive({",
+    "    is_viewer() && !is.null(getQueryString()$admin)",
+    "  })",
+    '  outputOptions(output, "is_admin", suspendWhenHidden = FALSE)',
+    "",
+    "  output$admin_panel <- renderText({",
+    '    res <- ""',
+    "    if (!is.null(users())) {",
+    "      res <- paste0(",
+    "        res,",
+    "        paste0(",
+    '          "Users:\\n",',
+    '          paste(apply(users(), 1, paste, collapse = " || "), collapse = "\\n")',
+    "        ),",
+    '        "\\n\\n"',
+    "      )",
+    "    }",
+    (if (elems$audience_questions@enabled) {
+      paste(
+        "    if (!is.null(aud_qs())) {",
+        "      res <- paste0(",
+        "        res,",
+        "        paste(",
+        '          "Audience questions:",',
+        "          paste(",
+        '            apply(aud_qs(), 1, paste, collapse = " || "),',
+        '            collapse = "\\n"',
+        "          ),",
+        '          sep = "\\n"',
+        "        ),",
+        '        "\\n\\n"',
+        "      )",
+        "    }",
+        sep = "\n"
+      )
+    }),
+    elems_admin_panel(),
+    "    res",
+    "  })",
+    sep = "\n"
+  )
+}
+
+elems_admin_panel <- function() {
+  objects <- elems$objects
+  paste(
+    lapply(objects, function(act_obj) {
+      switch(
+        class(act_obj),
+        Poll = add_poll_admin_panel(act_obj),
+        Question = add_question_admin_panel(act_obj),
+        Rating = add_rating_admin_panel(act_obj),
+        Wordcloud = add_wordcloud_admin_panel(act_obj)
+      )
+    }),
+    collapse = "\n"
+  )
 }
 
 add_server_footer <- function(file) {
