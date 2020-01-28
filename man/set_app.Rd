@@ -40,3 +40,8 @@ app must be hosted on any Shiny server, by default it will try to use
 Calling this function will reset all existing interaction objects.
 At the moment, just one interactive object per slide is allowed.
 }
+\details{
+To enter the `interactingan` server admin panel, in a browser, enter to the
+URL: "SERVER_URL/?viewer=`key`&admin", for example
+https://my_username.shinyapps.io/presentation/?viewer=IACC&admin
+}

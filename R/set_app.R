@@ -6,6 +6,10 @@
 #' Calling this function will reset all existing interaction objects.
 #' At the moment, just one interactive object per slide is allowed.
 #'
+#' To enter the `interactingan` server admin panel, in a browser, enter to the
+#' URL: "SERVER_URL/?viewer=`key`&admin", for example
+#' https://my_username.shinyapps.io/presentation/?viewer=IACC&admin
+#'
 #' @param app_name A character -string- with the name of the Shiny app to
 #'   create. Must be unique in your Shiny server, or it will overwrite it.
 #' @param key A character -string- with a personal key to access interactions
