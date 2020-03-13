@@ -2,8 +2,7 @@
 ================
 
 Have you ever tried [slido](https://www.sli.do/) or
-[Mentimeter](https://www.mentimeter.com/)? So you know how useful are,
-for teaching or conferences, having audience interactive slides. But,
+[Mentimeter](https://www.mentimeter.com/)? So you know how useful it is having audience interactive slides for teaching or conferences. But,
 you also love using your `xaringan` slides.
 
 Now, thanks to `interactingan`, it is possible to incorporate
