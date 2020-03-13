@@ -18,8 +18,7 @@ Imports:
     ggplot2,
     methods,
     qrcode,
-    rsconnect
-Suggests:
+    rsconnect,
     shiny,
     shinythemes,
     wordcloud,
