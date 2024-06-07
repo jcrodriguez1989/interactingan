@@ -94,14 +94,14 @@ empty_app <- function() {
 }
 
 #' @import ggplot2
-#' @importFrom qrcode qrcode_gen
+#' @importFrom qrcode qr_code
 #'
 qr_gen <- function(text) {
   if (!require("qrcode")) {
     return(invisible(text))
   }
 
-  qr_matrix <- qrcode_gen(text, dataOutput = TRUE, plotQRcode = FALSE)
+  qr_matrix <- qr_code(text)
   qr_matrix <- as.data.frame.table(qr_matrix)
   qr_matrix[1:2] <- lapply(qr_matrix[1:2], as.numeric)
   qr_matrix <- qr_matrix[qr_matrix$Freq == 1, ]
